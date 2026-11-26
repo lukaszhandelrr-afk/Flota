@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Zarządzania Flotą</title>
-    <script src="https://unpkg.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f1f5f9; color: #1e293b; min-height: 100vh; }
@@ -89,12 +88,18 @@
         </div>
     </div>
     <script>
-        var SUPABASE_URL = 'https://supabase.co';
-        var SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+        var API_URL = 'https://supabase.co';
+        var API_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
         var HASLO_ADMINA = 'Flota2026'; 
-        var bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         var allData = [];
         var currentFilter = 'ALL';
+
+        var headers = {
+            'apikey': API_KEY,
+            'Authorization': 'Bearer ' + API_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        };
 
         function checkPass() {
             if (document.getElementById('pass-input').value === HASLO_ADMINA) {
@@ -118,23 +123,25 @@
 
         async function loadData() {
             var container = document.getElementById('lista-zgloszen');
+            container.innerHTML = '<p style="text-align:center; color:#64748b; padding:24px;">Ładowanie danych...</p>';
             try {
-                var res = await bazaDanych.from('zgloszenia').select('*').order('created_at', { ascending: false });
-                if (res.error) {
-                    container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy: ' + res.error.message + '</div>';
+                var response = await fetch(API_URL + '?select=*&order=created_at.desc', { headers: headers });
+                if (!response.ok) {
+                    var errText = await response.text();
+                    container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy (' + response.status + '): ' + errText + '</div>';
                     return;
                 }
-                allData = res.data || [];
+                allData = await response.json();
                 renderList();
             } catch (err) {
-                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd połączenia: ' + err.message + '</div>';
+                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd sieci: ' + err.message + '</div>';
             }
         }
 
         function renderList() {
             var container = document.getElementById('lista-zgloszen');
             var filtered = currentFilter === 'ALL' ? allData : allData.filter(function(item) { return item.typ === currentFilter; });
-            if (filtered.length === 0) {
+            if (!filtered || filtered.length === 0) {
                 container.innerHTML = '<div style="background:#fff; padding:28px; border-radius:16px; text-align:center; color:#94a3b8;">Brak wpisów w bazie danych.</div>';
                 return;
             }
@@ -178,8 +185,12 @@
             var auto = document.getElementById('new-auto').value.trim();
             var opis = document.getElementById('new-opis').value.trim();
             if (!auto || !opis) return alert('Wpisz auto i opis!');
-            var res = await bazaDanych.from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis: opis }]);
-            if (res.error) return alert('Błąd: ' + res.error.message);
+            var res = await fetch(API_URL, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ auto: auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis: opis })
+            });
+            if (!res.ok) return alert('Błąd dodawania!');
             document.getElementById('new-auto').value = '';
             document.getElementById('new-opis').value = '';
             loadData();
@@ -188,21 +199,30 @@
         async function saveChanges(id) {
             var opis = document.getElementById('opis-' + id).value;
             var uwagi_admina = document.getElementById('admin-' + id).value;
-            var res = await bazaDanych.from('zgloszenia').update({ opis: opis, uwagi_admina: uwagi_admina }).eq('id', id);
-            if (res.error) return alert('Błąd: ' + res.error.message);
+            var res = await fetch(API_URL + '?id=eq.' + id, {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify({ opis: opis, uwagi_admina: uwagi_admina })
+            });
+            if (!res.ok) return alert('Błąd zapisu!');
             alert('Zapisano zmiany!');
         }
 
         async function updateStatus(id, status) {
-            var res = await bazaDanych.from('zgloszenia').update({ status: status }).eq('id', id);
-            if (res.error) return alert('Błąd: ' + res.error.message);
+            await fetch(API_URL + '?id=eq.' + id, {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify({ status: status })
+            });
             loadData();
         }
 
         async function deleteEntry(id) {
             if (confirm('Na pewno usunąć ten wpis?')) {
-                var res = await bazaDanych.from('zgloszenia').delete().eq('id', id);
-                if (res.error) return alert('Błąd: ' + res.error.message);
+                await fetch(API_URL + '?id=eq.' + id, {
+                    method: 'DELETE',
+                    headers: headers
+                });
                 loadData();
             }
         }
