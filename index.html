@@ -1,387 +1,161 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flota Gołaszewski – System NFC</title>
-    <script src="https://jsdelivr.net"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0f172a; min-height: 100vh; padding: 16px; color: #1e293b; }
-        .hidden { display: none !important; }
-        .wrap { max-width: 520px; margin: 0 auto; }
-        .card { background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-        .header { background: #1e293b; color: #ffffff; padding: 20px; position: relative; text-align: center; }
-        .boss-btn { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.12); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
-        .badge { display: inline-block; background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(96,165,250,0.3); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; }
-        .auto-title { font-size: 22px; font-weight: 800; margin-top: 10px; }
-        .auto-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
-        .content { padding: 20px; }
-        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
-        .tab-btn { border: none; background: transparent; padding: 12px 8px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; }
-        .tab-btn.active-green { background: #ffffff; color: #047857; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        .tab-btn.active-red { background: #ffffff; color: #dc2626; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        .field { margin-bottom: 15px; }
-        .label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
-        .input, .textarea, .select { width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 14px; background: #f8fafc; color: #0f172a; }
-        .checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-        .check-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; }
-        .check-row.state-ok { background: #ecfdf5; border-color: #10b981; }
-        .check-row.state-bad { background: #fef2f2; border-color: #ef4444; }
-        .check-text { font-size: 13px; font-weight: 600; }
-        .btn-group { display: flex; gap: 5px; flex-shrink: 0; }
-        .opt-btn { border: 1.5px solid #cbd5e1; background: #ffffff; color: #64748b; font-size: 11px; font-weight: 700; padding: 6px 9px; border-radius: 8px; cursor: pointer; }
-        .opt-btn.sel-ok { background: #059669; border-color: #059669; color: #ffffff; }
-        .opt-btn.sel-bad { background: #dc2626; border-color: #dc2626; color: #ffffff; }
-        .photo-box { border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 14px; padding: 14px; text-align: center; cursor: pointer; display: block; }
-        .photo-preview { max-width: 100%; max-height: 180px; border-radius: 10px; margin: 10px auto 0; display: none; }
-        .submit-btn { width: 100%; padding: 15px; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; color: #ffffff; cursor: pointer; }
-        .btn-green { background: #059669; }
-        .btn-red { background: #dc2626; }
-        .btn-blue { background: #2563eb; }
-        .btn-dark { background: #0f172a; }
-        .admin-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-left: 5px solid #2563eb; border-radius: 16px; padding: 14px; margin-bottom: 14px; }
-        .admin-item.is-ok { border-left-color: #10b981; }
-        .admin-item.is-bad { border-left-color: #ef4444; }
-        .chip { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin: 2px; background: #e2e8f0; color: #334155; }
-        .chip.ok { background: #dcfce7; color: #166534; }
-        .chip.bad { background: #fee2e2; color: #991b1b; }
-        .attached-img { max-width: 100%; max-height: 240px; border-radius: 10px; margin-top: 8px; border: 1px solid #cbd5e1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flota Gołaszewski</title>
+<script src="https://jsdelivr.net"></script>
+<style>
+*{box-sizing:border-box;font-family:sans-serif}
+body{background:#0f172a;margin:0;padding:14px;color:#1e293b}
+.box{max-width:480px;margin:auto;background:#fff;border-radius:20px;overflow:hidden}
+.top{background:#1e293b;color:#fff;padding:18px;text-align:center;position:relative}
+.sbtn{position:absolute;top:12px;right:12px;background:#334155;color:#fff;border:0;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:bold}
+.pad{padding:18px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f1f5f9;padding:5px;border-radius:12px;margin-bottom:14px}
+.tbtn{border:0;background:0;padding:10px;border-radius:9px;font-weight:bold;color:#64748b}
+.act{background:#fff;color:#059669;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.actr{background:#fff;color:#dc2626;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+input,textarea,select{width:100%;padding:11px;margin:5px 0 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600}
+.obtn{border:1px solid #cbd5e1;background:#fff;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:bold;margin-left:4px}
+.ok{background:#059669;color:#fff;border-color:#059669}
+.bad{background:#dc2626;color:#fff;border-color:#dc2626}
+.sub{width:100%;padding:14px;border:0;border-radius:12px;color:#fff;font-weight:bold;font-size:15px;background:#059669}
+.card{background:#f8fafc;border:1px solid #cbd5e1;border-left:5px solid #2563eb;padding:12px;border-radius:12px;margin-bottom:12px}
+.chip{display:inline-block;font-size:11px;padding:3px 6px;margin:2px;background:#e2e8f0;border-radius:5px}
+img{max-width:100%;max-height:200px;border-radius:8px;margin-top:6px}
+.hide{display:none!important}
+</style>
 </head>
 <body>
-<div class="wrap">
-    <div id="driver-view" class="card">
-        <div class="header">
-            <button type="button" onclick="openBossLogin()" class="boss-btn">🔒 Szef</button>
-            <span class="badge">System Flotowy NFC</span>
-            <div id="auto-display" class="auto-title">Wczytywanie...</div>
-            <div id="auto-sub" class="auto-sub">Wybierz czynność poniżej</div>
-        </div>
-        <div class="content">
-            <div class="tabs">
-                <button type="button" id="tab-checklista" class="tab-btn active-green">📋 Przed trasą</button>
-                <button type="button" id="tab-usterka" class="tab-btn">🔧 Zgłoś usterkę</button>
-            </div>
-            <form id="zgloszenie-form">
-                <div id="manual-auto-box" class="field hidden">
-                    <label class="label">Numer rejestracyjny pojazdu</label>
-                    <input type="text" id="auto-input" class="input" placeholder="np. WA 12345" style="font-weight:700;">
-                </div>
-                <div class="field">
-                    <label class="label">Imię i nazwisko kierowcy</label>
-                    <input type="text" id="kierowca" class="input" required placeholder="Wpisz swoje imię i nazwisko">
-                </div>
-                <div id="sekcja-checklista" class="checklist">
-                    <label class="label">Zaznacz stan każdego punktu (OK lub Źle):</label>
-                    <div id="checklist-items"></div>
-                </div>
-                <div class="field">
-                    <label class="label">📷 Dodaj zdjęcie (opcjonalnie – np. rysa, brud, usterka)</label>
-                    <label class="photo-box">
-                        <span id="photo-label" style="font-size:13px; font-weight:700; color:#2563eb;">📸 Kliknij, aby zrobić zdjęcie lub wybrać z galerii</span>
-                        <input type="file" id="photo-input" accept="image/*" style="display:none;">
-                        <img id="photo-preview" class="photo-preview" alt="Podgląd">
-                    </label>
-                </div>
-                <div class="field">
-                    <label id="opis-label" class="label">Dodatkowe uwagi (opcjonalnie)</label>
-                    <textarea id="opis" rows="3" class="textarea" placeholder="Opisz np. co jest nie tak, zarysowania itp..."></textarea>
-                </div>
-                <button type="submit" id="submit-btn" class="submit-btn btn-green">✅ Zatwierdź kontrolę przed trasą</button>
-            </form>
-            <div id="status-msg" class="hidden" style="padding:20px; border-radius:16px; text-align:center;"></div>
-        </div>
+<div class="box">
+  <div id="v-drv">
+    <div class="top">
+      <button type="button" class="sbtn" onclick="show('v-log')">🔒 Szef</button>
+      <div style="font-size:11px;color:#93c5fd">SYSTEM FLOTOWY NFC</div>
+      <h2 id="a-txt" style="margin:6px 0 0">Wczytywanie...</h2>
     </div>
-
-    <div id="boss-login" class="card hidden">
-        <div class="header">
-            <button type="button" onclick="backToDriver()" class="boss-btn">← Wróć</button>
-            <span class="badge">Strefa Zarządzania</span>
-            <div class="auto-title">Panel Szefa</div>
-        </div>
-        <div class="content" style="text-align:center;">
-            <input type="password" id="boss-pass" class="input" placeholder="Wpisz hasło (Flota2026)" style="text-align:center; font-size:16px; margin-bottom:14px;">
-            <button type="button" onclick="checkBossPass()" class="submit-btn btn-dark">Zaloguj się</button>
-        </div>
+    <div class="pad">
+      <div class="tabs">
+        <button type="button" id="t1" class="tbtn act" onclick="mode('Checklista')">📋 Przed trasą</button>
+        <button type="button" id="t2" class="tbtn" onclick="mode('Usterka')">🔧 Usterka</button>
+      </div>
+      <form id="frm">
+        <div id="m-box" class="hide"><input id="a-in" placeholder="Nr rejestracyjny auta"></div>
+        <input id="k-in" required placeholder="Imię i nazwisko kierowcy">
+        <div id="chk-box"></div>
+        <label style="display:block;border:2px dashed #cbd5e1;padding:12px;text-align:center;border-radius:10px;margin-bottom:12px;font-size:13px;color:#2563eb;font-weight:bold">
+          <span id="p-lbl">📷 Dodaj zdjęcie (opcjonalnie)</span>
+          <input type="file" id="p-in" accept="image/*" class="hide">
+          <img id="p-prv" class="hide" style="margin:8px auto 0">
+        </label>
+        <textarea id="o-in" rows="3" placeholder="Dodatkowe uwagi..."></textarea>
+        <button type="submit" id="s-btn" class="sub">✅ Zatwierdź kontrolę</button>
+      </form>
+      <div id="msg" class="hide" style="text-align:center;padding:20px;font-weight:bold"></div>
     </div>
-
-    <div id="boss-panel" class="card hidden">
-        <div class="header">
-            <button type="button" onclick="backToDriver()" class="boss-btn">← Kierowca</button>
-            <div class="auto-title" style="margin-top:0;">🚛 Flota Gołaszewski</div>
-            <div class="auto-sub">Kontrole przed trasą, zdjęcia i usterki</div>
-        </div>
-        <div class="content">
-            <div style="display:flex; gap:8px; margin-bottom:16px;">
-                <button type="button" onclick="loadBossData()" class="submit-btn btn-blue" style="padding:10px; font-size:13px;">🔄 Odśwież listę</button>
-            </div>
-            <div style="background:#f8fafc; padding:14px; border-radius:14px; border:1px solid #e2e8f0; margin-bottom:18px;">
-                <label class="label">➕ Dodaj własne zlecenie dla mechaników</label>
-                <input type="text" id="new-auto" class="input" placeholder="Nr auta (np. SCANIA 01)" style="margin-bottom:8px;">
-                <input type="text" id="new-opis" class="input" placeholder="Co trzeba zrobić?" style="margin-bottom:8px;">
-                <button type="button" onclick="addBossEntry()" class="submit-btn btn-green" style="padding:10px; font-size:13px;">Dodaj wpis</button>
-            </div>
-            <div id="boss-list">Ładowanie...</div>
-        </div>
+  </div>
+  <div id="v-log" class="hide">
+    <div class="top"><button type="button" class="sbtn" onclick="show('v-drv')">← Wróć</button><h2>Panel Szefa</h2></div>
+    <div class="pad">
+      <input type="password" id="pass" placeholder="Hasło (Flota2026)">
+      <button type="button" class="sub" style="background:#0f172a" onclick="log()">Wejdź</button>
     </div>
+  </div>
+  <div id="v-adm" class="hide">
+    <div class="top"><button type="button" class="sbtn" onclick="show('v-drv')">← Kierowca</button><h2>🚛 Flota Gołaszewski</h2></div>
+    <div class="pad">
+      <button type="button" class="sub" style="background:#2563eb;padding:10px;margin-bottom:12px" onclick="load()">🔄 Odśwież listę</button>
+      <div style="background:#f8fafc;padding:10px;border-radius:10px;border:1px solid #cbd5e1;margin-bottom:14px">
+        <input id="na" placeholder="Nr auta" style="margin:4px 0">
+        <input id="no" placeholder="Co do zrobienia?" style="margin:4px 0">
+        <button type="button" class="sub" style="padding:9px" onclick="add()">➕ Dodaj zlecenie</button>
+      </div>
+      <div id="lst">Ładowanie...</div>
+    </div>
+  </div>
 </div>
 <script>
-var SB_URL = 'https://supabase.co';
-var SB_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
-var db = null;
+var U='https://supabase.co',K='sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t',db=null,md='Checklista',ph='';
+function gDb(){if(!db&&window.supabase)db=window.supabase.createClient(U,K);return db;}
+function show(id){['v-drv','v-log','v-adm'].forEach(function(v){document.getElementById(v).classList.add('hide');});document.getElementById(id).classList.remove('hide');}
 
-function getDb() {
-    if (!db && window.supabase) {
-        db = window.supabase.createClient(SB_URL, SB_KEY);
-    }
-    return db;
+var pts=['🛢️ Poziom oleju','💡 Światła','🛞 Opony','🧹 Porządek w kabinie','☣️ ADR','🧯 Gaśnica','📄 Licencja'];
+var h='';
+pts.forEach(function(p){h+='<div class="row" data-n="'+p+'" data-s="skip"><span>'+p+'</span><div><button type="button" class="obtn" onclick="chk(this,\'ok\')">OK</button><button type="button" class="obtn" onclick="chk(this,\'bad\')">Źle</button></div></div>';});
+document.getElementById('chk-box').innerHTML=h;
+
+function chk(b,s){
+  var r=b.closest('.row'),bs=r.querySelectorAll('.obtn');
+  bs.className='obtn';bs.className='obtn';
+  if(r.dataset.s===s){r.dataset.s='skip';}else{r.dataset.s=s;bs[s==='ok'?0:1].className='obtn '+s;}
 }
 
-var currentMode = 'Checklista';
-var compressedPhoto = '';
+document.getElementById('p-in').onchange=function(e){
+  var f=e.target.files;if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var c=document.createElement('canvas'),sc=img.width>700?700/img.width:1;
+      c.width=img.width*sc;c.height=img.height*sc;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      ph=c.toDataURL('image/jpeg',0.6);
+      var p=document.getElementById('p-prv');p.src=ph;p.classList.remove('hide');
+      document.getElementById('p-lbl').textContent='✅ Zdjęcie gotowe';
+    };img.src=ev.target.result;
+  };r.readAsDataURL(f);
+};
 
-var punkty = [
-    { icon: '🛢️', name: 'Poziom oleju' },
-    { icon: '💡', name: 'Oświetlenie pojazdu' },
-    { icon: '🛞', name: 'Stan opon' },
-    { icon: '🧹', name: 'Porządek w kabinie' },
-    { icon: '☣️', name: 'Wyposażenie / dokumenty ADR' },
-    { icon: '🧯', name: 'Gaśnica na miejscu' },
-    { icon: '📄', name: 'Licencja przewoźnika' }
-];
-
-var listHtml = '';
-for (var i = 0; i < punkty.length; i++) {
-    listHtml += '<div class="check-row" data-name="' + punkty[i].name + '" data-status="skip">' +
-        '<span class="check-text">' + punkty[i].icon + ' ' + punkty[i].name + '</span>' +
-        '<div class="btn-group">' +
-            '<button type="button" class="opt-btn" onclick="setCheck(this,\'ok\')">✅ OK</button>' +
-            '<button type="button" class="opt-btn" onclick="setCheck(this,\'bad\')">⚠️ Źle</button>' +
-        '</div></div>';
-}
-document.getElementById('checklist-items').innerHTML = listHtml;
-
-function setCheck(btn, st) {
-    var row = btn.closest('.check-row');
-    var btns = row.querySelectorAll('.opt-btn');
-    btns.className = 'opt-btn';
-    btns.className = 'opt-btn';
-    if (row.getAttribute('data-status') === st) {
-        row.setAttribute('data-status', 'skip');
-        row.className = 'check-row';
-    } else {
-        row.setAttribute('data-status', st);
-        row.className = st === 'ok' ? 'check-row state-ok' : 'check-row state-bad';
-        btns[st === 'ok' ? 0 : 1].className = st === 'ok' ? 'opt-btn sel-ok' : 'opt-btn sel-bad';
-    }
+function mode(m){
+  md=m;
+  document.getElementById('t1').className=m==='Checklista'?'tbtn act':'tbtn';
+  document.getElementById('t2').className=m==='Usterka'?'tbtn actr':'tbtn';
+  document.getElementById('chk-box').classList.toggle('hide',m!=='Checklista');
+  var b=document.getElementById('s-btn');
+  b.textContent=m==='Checklista'?'✅ Zatwierdź kontrolę':'🔧 Wyślij usterkę';
+  b.style.background=m==='Checklista'?'#059669':'#dc2626';
 }
 
-document.getElementById('photo-input').addEventListener('change', function(e) {
-    var file = e.target.files;
-    if (!file) return;
-    document.getElementById('photo-label').textContent = '⏳ Przetwarzanie zdjęcia...';
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-        var img = new Image();
-        img.onload = function() {
-            var c = document.createElement('canvas');
-            var scale = img.width > 800 ? (800 / img.width) : 1;
-            c.width = img.width * scale;
-            c.height = img.height * scale;
-            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-            compressedPhoto = c.toDataURL('image/jpeg', 0.65);
-            var prev = document.getElementById('photo-preview');
-            prev.src = compressedPhoto;
-            prev.style.display = 'block';
-            document.getElementById('photo-label').textContent = '✅ Zdjęcie gotowe (kliknij, aby zmienić)';
-        };
-        img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-});
+var ap=new URLSearchParams(location.search).get('auto'),ai=document.getElementById('a-in');
+if(ap){document.getElementById('a-txt').textContent=ap;ai.value=ap;}
+else{document.getElementById('a-txt').textContent='Wybór ręczny';document.getElementById('m-box').classList.remove('hide');ai.required=true;}
 
-var tabCheck = document.getElementById('tab-checklista');
-var tabUsterka = document.getElementById('tab-usterka');
-var sekcjaCheck = document.getElementById('sekcja-checklista');
-var opisLabel = document.getElementById('opis-label');
-var opisInput = document.getElementById('opis');
-var submitBtn = document.getElementById('submit-btn');
+document.getElementById('frm').onsubmit=async function(e){
+  e.preventDefault();
+  var b=document.getElementById('s-btn');b.disabled=true;b.textContent='Wysyłanie...';
+  var lk='';
+  if(md==='Checklista'){
+    var a=[];document.querySelectorAll('.row').forEach(function(r){
+      var s=r.dataset.s,n=r.dataset.n;
+      a.push((s==='ok'?'✅ ':s==='bad'?'⚠️ PROBLEM: ':'⬜ ')+n);
+    });lk=a.join('\n');
+  }
+  var res=await gDb().from('zgloszenia').insert([{auto:ai.value.trim(),kierowca:document.getElementById('k-in').value.trim(),typ:md,lista_kontrolna:lk,opis:document.getElementById('o-in').value.trim()||'Brak uwag',zdjecie:ph}]);
+  if(res.error){alert('Błąd: '+res.error.message);b.disabled=false;}
+  else{document.getElementById('frm').classList.add('hide');var m=document.getElementById('msg');m.textContent='✅ Zapisano pomyślnie!';m.classList.remove('hide');}
+};
 
-tabCheck.addEventListener('click', function() {
-    currentMode = 'Checklista';
-    tabCheck.className = 'tab-btn active-green';
-    tabUsterka.className = 'tab-btn';
-    sekcjaCheck.classList.remove('hidden');
-    opisLabel.textContent = 'Dodatkowe uwagi (opcjonalnie)';
-    opisInput.required = false;
-    submitBtn.textContent = '✅ Zatwierdź kontrolę przed trasą';
-    submitBtn.className = 'submit-btn btn-green';
-});
+function log(){if(document.getElementById('pass').value==='Flota2026'){show('v-adm');load();}else alert('Złe hasło');}
 
-tabUsterka.addEventListener('click', function() {
-    currentMode = 'Usterka';
-    tabUsterka.className = 'tab-btn active-red';
-    tabCheck.className = 'tab-btn';
-    sekcjaCheck.classList.add('hidden');
-    opisLabel.textContent = 'Opis usterki dla mechaników';
-    opisInput.required = true;
-    submitBtn.textContent = '🔧 Wyślij usterkę do warsztatu';
-    submitBtn.className = 'submit-btn btn-red';
-});
-var urlParams = new URLSearchParams(window.location.search);
-var autoParam = urlParams.get('auto');
-var autoInput = document.getElementById('auto-input');
-if (autoParam) {
-    document.getElementById('auto-display').textContent = autoParam;
-    document.getElementById('auto-sub').textContent = 'Pojazd zidentyfikowany przez tag NFC';
-    autoInput.value = autoParam;
-} else {
-    document.getElementById('auto-display').textContent = 'Wybór ręczny pojazdu';
-    document.getElementById('auto-sub').textContent = 'Brak breloka NFC – wpisz numer auta';
-    document.getElementById('manual-auto-box').classList.remove('hidden');
-    autoInput.required = true;
+async function load(){
+  var el=document.getElementById('lst');el.textContent='Pobieranie...';
+  var res=await gDb().from('zgloszenia').select('*').order('created_at',{ascending:false});
+  if(res.error){el.textContent='Błąd: '+res.error.message;return;}
+  if(!res.data.length){el.textContent='Brak wpisów.';return;}
+  var o='';
+  res.data.forEach(function(x){
+    var ch=x.lista_kontrolna?'<div>'+x.lista_kontrolna.split('\n').map(function(l){return'<span class="chip">'+l+'</span>';}).join('')+'</div>':'';
+    var im=x.zdjecie?'<img src="'+x.zdjecie+'">':'';
+    o+='<div class="card"><div style="display:flex;justify-content:space-between"><b>'+x.auto+' • '+x.kierowca+'</b><button onclick="del('+x.id+')" style="background:#dc2626;color:#fff;border:0;border-radius:6px;padding:4px 8px">🗑️</button></div><small>'+x.typ+' • '+new Date(x.created_at).toLocaleString('pl-PL')+'</small>'+ch+im+'<textarea id="o'+x.id+'" rows="2">'+x.opis+'</textarea><textarea id="a'+x.id+'" rows="2" placeholder="Uwagi szefa..." style="background:#fffbeb">'+(x.uwagi_admina||'')+'</textarea><div style="display:flex;gap:6px"><select onchange="st('+x.id+',this.value)"><option '+(x.status==='Do zrobienia'?'selected':'')+'>Do zrobienia</option><option '+(x.status==='W trakcie'?'selected':'')+'>W trakcie</option><option '+(x.status==='Gotowe'?'selected':'')+'>Gotowe</option></select><button onclick="sv('+x.id+')" style="background:#0f172a;color:#fff;border:0;border-radius:8px;padding:0 14px;font-weight:bold">Zapisz</button></div></div>';
+  });
+  el.innerHTML=o;
 }
 
-document.getElementById('zgloszenie-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var msg = document.getElementById('status-msg');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Wysyłanie...';
-
-    var podsumowanie = '';
-    if (currentMode === 'Checklista') {
-        var rows = document.querySelectorAll('.check-row');
-        var arr = [];
-        for (var j = 0; j < rows.length; j++) {
-            var st = rows[j].getAttribute('data-status');
-            var nm = rows[j].getAttribute('data-name');
-            if (st === 'ok') arr.push('✅ ' + nm);
-            else if (st === 'bad') arr.push('⚠️ PROBLEM: ' + nm);
-            else arr.push('⬜ Pominięto: ' + nm);
-        }
-        podsumowanie = arr.join('\n');
-    }
-
-    var opisTekst = opisInput.value.trim() || (currentMode === 'Checklista' ? 'Kontrola przed trasą wykonana.' : '');
-    var res = await getDb().from('zgloszenia').insert([{
-        auto: autoInput.value.trim(),
-        kierowca: document.getElementById('kierowca').value.trim(),
-        typ: currentMode,
-        lista_kontrolna: podsumowanie,
-        opis: opisTekst,
-        zdjecie: compressedPhoto
-    }]);
-
-    if (res.error) {
-        msg.textContent = 'Błąd bazy: ' + res.error.message;
-        msg.style.background = '#fef2f2';
-        msg.style.color = '#991b1b';
-        msg.classList.remove('hidden');
-        submitBtn.disabled = false;
-    } else {
-        document.getElementById('zgloszenie-form').classList.add('hidden');
-        msg.innerHTML = '<div style="font-size:32px;">✅</div><b>Zapisano pomyślnie!</b><br><small>Dane przesłane do systemu.</small>';
-        msg.style.background = '#ecfdf5';
-        msg.style.color = '#065f46';
-        msg.classList.remove('hidden');
-    }
-});
-
-function openBossLogin() {
-    document.getElementById('driver-view').classList.add('hidden');
-    document.getElementById('boss-login').classList.remove('hidden');
-}
-
-function backToDriver() {
-    document.getElementById('boss-login').classList.add('hidden');
-    document.getElementById('boss-panel').classList.add('hidden');
-    document.getElementById('driver-view').classList.remove('hidden');
-}
-
-function checkBossPass() {
-    if (document.getElementById('boss-pass').value === 'Flota2026') {
-        document.getElementById('boss-login').classList.add('hidden');
-        document.getElementById('boss-panel').classList.remove('hidden');
-        loadBossData();
-    } else {
-        alert('Błędne hasło!');
-    }
-}
-
-async function loadBossData() {
-    var el = document.getElementById('boss-list');
-    el.innerHTML = 'Pobieranie z bazy...';
-    var res = await getDb().from('zgloszenia').select('*').order('created_at', { ascending: false });
-    if (res.error) { el.innerHTML = 'Błąd: ' + res.error.message; return; }
-    var data = res.data || [];
-    if (!data.length) { el.innerHTML = 'Brak wpisów w bazie.'; return; }
-
-    var out = '';
-    for (var i = 0; i < data.length; i++) {
-        var x = data[i];
-        var isCheck = x.typ === 'Checklista';
-        var chips = '';
-        if (x.lista_kontrolna) {
-            var lines = x.lista_kontrolna.split('\n');
-            for (var j = 0; j < lines.length; j++) {
-                var cls = lines[j].indexOf('✅') !== -1 ? 'ok' : (lines[j].indexOf('⚠️') !== -1 ? 'bad' : '');
-                chips += '<span class="chip ' + cls + '">' + lines[j] + '</span>';
-            }
-            chips = '<div style="margin:8px 0;">' + chips + '</div>';
-        }
-        var img = (x.zdjecie && x.zdjecie.length > 20) ? '<div><img src="' + x.zdjecie + '" class="attached-img"></div>' : '';
-        out += '<div class="admin-item ' + (isCheck ? 'is-ok' : 'is-bad') + '">' +
-            '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-                '<b>' + x.auto + ' • ' + x.kierowca + '</b>' +
-                '<button type="button" onclick="delBossEntry(' + x.id + ')" style="background:#fee2e2; color:#b91c1c; border:none; padding:5px 9px; border-radius:8px; font-weight:700;">🗑️</button>' +
-            '</div>' +
-            '<div style="font-size:11px; color:#64748b; margin-top:2px;">' + (x.typ || 'Usterka') + ' • ' + new Date(x.created_at).toLocaleString('pl-PL') + '</div>' +
-            chips + img +
-            '<label class="label" style="margin-top:8px;">Uwagi kierowcy:</label>' +
-            '<textarea id="o-' + x.id + '" rows="2" class="textarea" style="margin-bottom:8px;">' + x.opis + '</textarea>' +
-            '<label class="label" style="color:#b45309;">Uwagi szefa / dla mechaników:</label>' +
-            '<textarea id="a-' + x.id + '" rows="2" class="textarea" style="background:#fffbeb; margin-bottom:8px;">' + (x.uwagi_admina || '') + '</textarea>' +
-            '<div style="display:flex; gap:8px;">' +
-                '<select onchange="statBossEntry(' + x.id + ', this.value)" class="select" style="padding:8px;">' +
-                    '<option ' + (x.status==='Do zrobienia'?'selected':'') + '>Do zrobienia</option>' +
-                    '<option ' + (x.status==='W trakcie'?'selected':'') + '>W trakcie</option>' +
-                    '<option ' + (x.status==='Gotowe'?'selected':'') + '>Gotowe</option>' +
-                '</select>' +
-                '<button type="button" onclick="saveBossEntry(' + x.id + ')" class="submit-btn btn-dark" style="padding:8px 14px; width:auto; font-size:12px;">💾 Zapisz</button>' +
-            '</div></div>';
-    }
-    el.innerHTML = out;
-}
-
-async function addBossEntry() {
-    var auto = document.getElementById('new-auto').value.trim();
-    var opis = document.getElementById('new-opis').value.trim();
-    if (!auto || !opis) return alert('Wpisz auto i opis!');
-    await getDb().from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF', typ: 'Usterka', opis: opis }]);
-    document.getElementById('new-auto').value = '';
-    document.getElementById('new-opis').value = '';
-    loadBossData();
-}
-
-async function saveBossEntry(id) {
-    await getDb().from('zgloszenia').update({
-        opis: document.getElementById('o-' + id).value,
-        uwagi_admina: document.getElementById('a-' + id).value
-    }).eq('id', id);
-    alert('Zapisano!');
-}
-
-async function statBossEntry(id, s) {
-    await getDb().from('zgloszenia').update({ status: s }).eq('id', id);
-}
-
-async function delBossEntry(id) {
-    if (confirm('Usunąć wpis?')) {
-        await getDb().from('zgloszenia').delete().eq('id', id);
-        loadBossData();
-    }
-}
+async function add(){var a=document.getElementById('na').value.trim(),o=document.getElementById('no').value.trim();if(!a||!o)return;await gDb().from('zgloszenia').insert([{auto:a,kierowca:'SZEF',typ:'Usterka',opis:o}]);document.getElementById('na').value='';document.getElementById('no').value='';load();}
+async function sv(id){await gDb().from('zgloszenia').update({opis:document.getElementById('o'+id).value,uwagi_admina:document.getElementById('a'+id).value}).eq('id',id);alert('Zapisano!');}
+async function st(id,s){await gDb().from('zgloszenia').update({status:s}).eq('id',id);}
+async function del(id){if(confirm('Usunąć?')){await gDb().from('zgloszenia').delete().eq('id',id);load();}}
 </script>
 </body>
 </html>
