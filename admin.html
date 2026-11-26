@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Zarządzania Flotą</title>
+    <script src="https://jsdelivr.net"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f1f5f9; color: #1e293b; min-height: 100vh; }
@@ -88,17 +89,19 @@
         </div>
     </div>
     <script>
-        var API_URL = 'https://supabase.co';
-        var API_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+        var SUPABASE_URL = 'https://supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
         var HASLO_ADMINA = 'Flota2026'; 
         var allData = [];
         var currentFilter = 'ALL';
+        var bazaDanych = null;
 
-        var headers = {
-            'apikey': API_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-        };
+        function getDb() {
+            if (!bazaDanych && window.supabase) {
+                bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return bazaDanych;
+        }
 
         function checkPass() {
             if (document.getElementById('pass-input').value === HASLO_ADMINA) {
@@ -123,18 +126,18 @@
         async function loadData() {
             var container = document.getElementById('lista-zgloszen');
             container.innerHTML = '<p style="text-align:center; color:#64748b; padding:24px;">Ładowanie danych...</p>';
-            try {
-                var response = await fetch(API_URL + '?select=*&order=created_at.desc', { headers: headers });
-                if (!response.ok) {
-                    var errText = await response.text();
-                    container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy (' + response.status + '): ' + errText + '</div>';
-                    return;
-                }
-                allData = await response.json();
-                renderList();
-            } catch (err) {
-                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd sieci: ' + err.message + '</div>';
+            var db = getDb();
+            if (!db) {
+                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Odśwież stronę (F5) – biblioteka jeszcze się ładuje.</div>';
+                return;
             }
+            var res = await db.from('zgloszenia').select('*').order('created_at', { ascending: false });
+            if (res.error) {
+                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy: ' + res.error.message + '</div>';
+                return;
+            }
+            allData = res.data || [];
+            renderList();
         }
 
         function renderList() {
@@ -184,12 +187,8 @@
             var auto = document.getElementById('new-auto').value.trim();
             var opis = document.getElementById('new-opis').value.trim();
             if (!auto || !opis) return alert('Wpisz auto i opis!');
-            var res = await fetch(API_URL, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({ auto: auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis: opis })
-            });
-            if (!res.ok) return alert('Błąd dodawania!');
+            var res = await getDb().from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis: opis }]);
+            if (res.error) return alert('Błąd: ' + res.error.message);
             document.getElementById('new-auto').value = '';
             document.getElementById('new-opis').value = '';
             loadData();
@@ -198,30 +197,21 @@
         async function saveChanges(id) {
             var opis = document.getElementById('opis-' + id).value;
             var uwagi_admina = document.getElementById('admin-' + id).value;
-            var res = await fetch(API_URL + '?id=eq.' + id, {
-                method: 'PATCH',
-                headers: headers,
-                body: JSON.stringify({ opis: opis, uwagi_admina: uwagi_admina })
-            });
-            if (!res.ok) return alert('Błąd zapisu!');
+            var res = await getDb().from('zgloszenia').update({ opis: opis, uwagi_admina: uwagi_admina }).eq('id', id);
+            if (res.error) return alert('Błąd: ' + res.error.message);
             alert('Zapisano zmiany!');
         }
 
         async function updateStatus(id, status) {
-            await fetch(API_URL + '?id=eq.' + id, {
-                method: 'PATCH',
-                headers: headers,
-                body: JSON.stringify({ status: status })
-            });
+            var res = await getDb().from('zgloszenia').update({ status: status }).eq('id', id);
+            if (res.error) return alert('Błąd: ' + res.error.message);
             loadData();
         }
 
         async function deleteEntry(id) {
             if (confirm('Na pewno usunąć ten wpis?')) {
-                await fetch(API_URL + '?id=eq.' + id, {
-                    method: 'DELETE',
-                    headers: headers
-                });
+                var res = await getDb().from('zgloszenia').delete().eq('id', id);
+                if (res.error) return alert('Błąd: ' + res.error.message);
                 loadData();
             }
         }
