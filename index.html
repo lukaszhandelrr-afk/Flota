@@ -6,26 +6,26 @@
 <title>Flota Gołaszewski</title>
 <script src="https://jsdelivr.net"></script>
 <style>
-*{box-sizing:border-box;font-family:sans-serif}
-body{background:#0f172a;margin:0;padding:14px;color:#1e293b}
-.box{max-width:480px;margin:auto;background:#fff;border-radius:20px;overflow:hidden}
-.top{background:#1e293b;color:#fff;padding:18px;text-align:center;position:relative}
-.sbtn{position:absolute;top:12px;right:12px;background:#334155;color:#fff;border:0;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:bold}
-.pad{padding:18px}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f1f5f9;padding:5px;border-radius:12px;margin-bottom:14px}
-.tbtn{border:0;background:0;padding:10px;border-radius:9px;font-weight:bold;color:#64748b}
-.act{background:#fff;color:#059669;box-shadow:0 2px 4px rgba(0,0,0,.1)}
-.actr{background:#fff;color:#dc2626;box-shadow:0 2px 4px rgba(0,0,0,.1)}
-input,textarea,select{width:100%;padding:11px;margin:5px 0 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}
-.row{display:flex;justify-content:space-between;align-items:center;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600}
-.obtn{border:1px solid #cbd5e1;background:#fff;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:bold;margin-left:4px}
-.ok{background:#059669;color:#fff;border-color:#059669}
-.bad{background:#dc2626;color:#fff;border-color:#dc2626}
-.sub{width:100%;padding:14px;border:0;border-radius:12px;color:#fff;font-weight:bold;font-size:15px;background:#059669}
-.card{background:#f8fafc;border:1px solid #cbd5e1;border-left:5px solid #2563eb;padding:12px;border-radius:12px;margin-bottom:12px}
-.chip{display:inline-block;font-size:11px;padding:3px 6px;margin:2px;background:#e2e8f0;border-radius:5px}
-img{max-width:100%;max-height:200px;border-radius:8px;margin-top:6px}
-.hide{display:none!important}
+* { box-sizing: border-box; font-family: sans-serif; }
+body { background: #0f172a; margin: 0; padding: 14px; color: #1e293b; }
+.box { max-width: 480px; margin: auto; background: #fff; border-radius: 20px; overflow: hidden; }
+.top { background: #1e293b; color: #fff; padding: 18px; text-align: center; position: relative; }
+.sbtn { position: absolute; top: 12px; right: 12px; background: #334155; color: #fff; border: 0; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+.pad { padding: 18px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #f1f5f9; padding: 5px; border-radius: 12px; margin-bottom: 14px; }
+.tbtn { border: 0; background: transparent; padding: 10px; border-radius: 9px; font-weight: bold; color: #64748b; }
+.act { background: #fff; color: #059669; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+.actr { background: #fff; color: #dc2626; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+input, textarea, select { width: 100%; padding: 11px; margin: 5px 0 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; }
+.row { display: flex; justify-content: space-between; align-items: center; padding: 9px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.obtn { border: 1px solid #cbd5e1; background: #fff; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 4px; }
+.ok { background: #059669; color: #fff; border-color: #059669; }
+.bad { background: #dc2626; color: #fff; border-color: #dc2626; }
+.sub { width: 100%; padding: 14px; border: 0; border-radius: 12px; color: #fff; font-weight: bold; font-size: 15px; background: #059669; }
+.card { background: #f8fafc; border: 1px solid #cbd5e1; border-left: 5px solid #2563eb; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
+.chip { display: inline-block; font-size: 11px; padding: 3px 6px; margin: 2px; background: #e2e8f0; border-radius: 5px; }
+img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 6px; }
+.hide { display: none !important; }
 </style>
 </head>
 <body>
@@ -77,85 +77,202 @@ img{max-width:100%;max-height:200px;border-radius:8px;margin-top:6px}
   </div>
 </div>
 <script>
-var U='https://supabase.co',K='sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t',db=null,md='Checklista',ph='';
-function gDb(){if(!db&&window.supabase)db=window.supabase.createClient(U,K);return db;}
-function show(id){['v-drv','v-log','v-adm'].forEach(function(v){document.getElementById(v).classList.add('hide');});document.getElementById(id).classList.remove('hide');}
+var U = 'https://jcahkbscekwiszmawwmo.supabase.co';
+var K = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+var db = null;
+var md = 'Checklista';
+var ph = '';
 
-var pts=['🛢️ Poziom oleju','💡 Światła','🛞 Opony','🧹 Porządek w kabinie','☣️ ADR','🧯 Gaśnica','📄 Licencja'];
-var h='';
-pts.forEach(function(p){h+='<div class="row" data-n="'+p+'" data-s="skip"><span>'+p+'</span><div><button type="button" class="obtn" onclick="chk(this,\'ok\')">OK</button><button type="button" class="obtn" onclick="chk(this,\'bad\')">Źle</button></div></div>';});
-document.getElementById('chk-box').innerHTML=h;
-
-function chk(b,s){
-  var r=b.closest('.row'),bs=r.querySelectorAll('.obtn');
-  bs.className='obtn';bs.className='obtn';
-  if(r.dataset.s===s){r.dataset.s='skip';}else{r.dataset.s=s;bs[s==='ok'?0:1].className='obtn '+s;}
-}
-
-document.getElementById('p-in').onchange=function(e){
-  var f=e.target.files;if(!f)return;
-  var r=new FileReader();
-  r.onload=function(ev){
-    var img=new Image();
-    img.onload=function(){
-      var c=document.createElement('canvas'),sc=img.width>700?700/img.width:1;
-      c.width=img.width*sc;c.height=img.height*sc;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      ph=c.toDataURL('image/jpeg',0.6);
-      var p=document.getElementById('p-prv');p.src=ph;p.classList.remove('hide');
-      document.getElementById('p-lbl').textContent='✅ Zdjęcie gotowe';
-    };img.src=ev.target.result;
-  };r.readAsDataURL(f);
-};
-
-function mode(m){
-  md=m;
-  document.getElementById('t1').className=m==='Checklista'?'tbtn act':'tbtn';
-  document.getElementById('t2').className=m==='Usterka'?'tbtn actr':'tbtn';
-  document.getElementById('chk-box').classList.toggle('hide',m!=='Checklista');
-  var b=document.getElementById('s-btn');
-  b.textContent=m==='Checklista'?'✅ Zatwierdź kontrolę':'🔧 Wyślij usterkę';
-  b.style.background=m==='Checklista'?'#059669':'#dc2626';
-}
-
-var ap=new URLSearchParams(location.search).get('auto'),ai=document.getElementById('a-in');
-if(ap){document.getElementById('a-txt').textContent=ap;ai.value=ap;}
-else{document.getElementById('a-txt').textContent='Wybór ręczny';document.getElementById('m-box').classList.remove('hide');ai.required=true;}
-
-document.getElementById('frm').onsubmit=async function(e){
-  e.preventDefault();
-  var b=document.getElementById('s-btn');b.disabled=true;b.textContent='Wysyłanie...';
-  var lk='';
-  if(md==='Checklista'){
-    var a=[];document.querySelectorAll('.row').forEach(function(r){
-      var s=r.dataset.s,n=r.dataset.n;
-      a.push((s==='ok'?'✅ ':s==='bad'?'⚠️ PROBLEM: ':'⬜ ')+n);
-    });lk=a.join('\n');
+function gDb() {
+  if (!db && window.supabase) {
+    db = window.supabase.createClient(U, K);
   }
-  var res=await gDb().from('zgloszenia').insert([{auto:ai.value.trim(),kierowca:document.getElementById('k-in').value.trim(),typ:md,lista_kontrolna:lk,opis:document.getElementById('o-in').value.trim()||'Brak uwag',zdjecie:ph}]);
-  if(res.error){alert('Błąd: '+res.error.message);b.disabled=false;}
-  else{document.getElementById('frm').classList.add('hide');var m=document.getElementById('msg');m.textContent='✅ Zapisano pomyślnie!';m.classList.remove('hide');}
-};
-
-function log(){if(document.getElementById('pass').value==='Flota2026'){show('v-adm');load();}else alert('Złe hasło');}
-
-async function load(){
-  var el=document.getElementById('lst');el.textContent='Pobieranie...';
-  var res=await gDb().from('zgloszenia').select('*').order('created_at',{ascending:false});
-  if(res.error){el.textContent='Błąd: '+res.error.message;return;}
-  if(!res.data.length){el.textContent='Brak wpisów.';return;}
-  var o='';
-  res.data.forEach(function(x){
-    var ch=x.lista_kontrolna?'<div>'+x.lista_kontrolna.split('\n').map(function(l){return'<span class="chip">'+l+'</span>';}).join('')+'</div>':'';
-    var im=x.zdjecie?'<img src="'+x.zdjecie+'">':'';
-    o+='<div class="card"><div style="display:flex;justify-content:space-between"><b>'+x.auto+' • '+x.kierowca+'</b><button onclick="del('+x.id+')" style="background:#dc2626;color:#fff;border:0;border-radius:6px;padding:4px 8px">🗑️</button></div><small>'+x.typ+' • '+new Date(x.created_at).toLocaleString('pl-PL')+'</small>'+ch+im+'<textarea id="o'+x.id+'" rows="2">'+x.opis+'</textarea><textarea id="a'+x.id+'" rows="2" placeholder="Uwagi szefa..." style="background:#fffbeb">'+(x.uwagi_admina||'')+'</textarea><div style="display:flex;gap:6px"><select onchange="st('+x.id+',this.value)"><option '+(x.status==='Do zrobienia'?'selected':'')+'>Do zrobienia</option><option '+(x.status==='W trakcie'?'selected':'')+'>W trakcie</option><option '+(x.status==='Gotowe'?'selected':'')+'>Gotowe</option></select><button onclick="sv('+x.id+')" style="background:#0f172a;color:#fff;border:0;border-radius:8px;padding:0 14px;font-weight:bold">Zapisz</button></div></div>';
-  });
-  el.innerHTML=o;
+  return db;
 }
 
-async function add(){var a=document.getElementById('na').value.trim(),o=document.getElementById('no').value.trim();if(!a||!o)return;await gDb().from('zgloszenia').insert([{auto:a,kierowca:'SZEF',typ:'Usterka',opis:o}]);document.getElementById('na').value='';document.getElementById('no').value='';load();}
-async function sv(id){await gDb().from('zgloszenia').update({opis:document.getElementById('o'+id).value,uwagi_admina:document.getElementById('a'+id).value}).eq('id',id);alert('Zapisano!');}
-async function st(id,s){await gDb().from('zgloszenia').update({status:s}).eq('id',id);}
-async function del(id){if(confirm('Usunąć?')){await gDb().from('zgloszenia').delete().eq('id',id);load();}}
+function show(id) {
+  ['v-drv', 'v-log', 'v-adm'].forEach(function(v) {
+    document.getElementById(v).classList.add('hide');
+  });
+  document.getElementById(id).classList.remove('hide');
+}
+
+var pts = ['🛢️ Poziom oleju', '💡 Światła', '🛞 Opony', '🧹 Porządek w kabinie', '☣️ ADR', '🧯 Gaśnica', '📄 Licencja'];
+var h = '';
+pts.forEach(function(p) {
+  h += '<div class="row" data-n="' + p + '" data-s="skip"><span>' + p + '</span><div>';
+  h += '<button type="button" class="obtn" onclick="chk(this,\'ok\')">OK</button>';
+  h += '<button type="button" class="obtn" onclick="chk(this,\'bad\')">Źle</button>';
+  h += '</div></div>';
+});
+document.getElementById('chk-box').innerHTML = h;
+
+function chk(b, s) {
+  var r = b.closest('.row');
+  var bs = r.querySelectorAll('.obtn');
+  bs[0].className = 'obtn';
+  bs[1].className = 'obtn';
+  if (r.dataset.s === s) {
+    r.dataset.s = 'skip';
+  } else {
+    r.dataset.s = s;
+    bs[s === 'ok' ? 0 : 1].className = 'obtn ' + s;
+  }
+}
+
+document.getElementById('p-in').onchange = function(e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var c = document.createElement('canvas');
+      var sc = img.width > 700 ? 700 / img.width : 1;
+      c.width = img.width * sc;
+      c.height = img.height * sc;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      ph = c.toDataURL('image/jpeg', 0.6);
+      var p = document.getElementById('p-prv');
+      p.src = ph;
+      p.classList.remove('hide');
+      document.getElementById('p-lbl').textContent = '✅ Zdjęcie gotowe';
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(f);
+};
+
+function mode(m) {
+  md = m;
+  document.getElementById('t1').className = m === 'Checklista' ? 'tbtn act' : 'tbtn';
+  document.getElementById('t2').className = m === 'Usterka' ? 'tbtn actr' : 'tbtn';
+  document.getElementById('chk-box').classList.toggle('hide', m !== 'Checklista');
+  var b = document.getElementById('s-btn');
+  b.textContent = m === 'Checklista' ? '✅ Zatwierdź kontrolę' : '🔧 Wyślij usterkę';
+  b.style.background = m === 'Checklista' ? '#059669' : '#dc2626';
+}
+
+var ap = new URLSearchParams(location.search).get('auto');
+var ai = document.getElementById('a-in');
+if (ap) {
+  document.getElementById('a-txt').textContent = ap;
+  ai.value = ap;
+} else {
+  document.getElementById('a-txt').textContent = 'Wybór ręczny';
+  document.getElementById('m-box').classList.remove('hide');
+  ai.required = true;
+}
+
+document.getElementById('frm').onsubmit = async function(e) {
+  e.preventDefault();
+  var b = document.getElementById('s-btn');
+  b.disabled = true;
+  b.textContent = 'Wysyłanie...';
+  var lk = '';
+  if (md === 'Checklista') {
+    var a = [];
+    document.querySelectorAll('.row').forEach(function(r) {
+      var s = r.dataset.s;
+      var n = r.dataset.n;
+      a.push((s === 'ok' ? '✅ ' : s === 'bad' ? '⚠️ PROBLEM: ' : '⬜ ') + n);
+    });
+    lk = a.join('\n');
+  }
+  var res = await gDb().from('zgloszenia').insert([{
+    auto: ai.value.trim(),
+    kierowca: document.getElementById('k-in').value.trim(),
+    typ: md,
+    lista_kontrolna: lk,
+    opis: document.getElementById('o-in').value.trim() || 'Brak uwag',
+    zdjecie: ph
+  }]);
+  if (res.error) {
+    alert('Błąd: ' + res.error.message);
+    b.disabled = false;
+  } else {
+    document.getElementById('frm').classList.add('hide');
+    var m = document.getElementById('msg');
+    m.textContent = '✅ Zapisano pomyślnie!';
+    m.classList.remove('hide');
+  }
+};
+
+function log() {
+  if (document.getElementById('pass').value === 'Flota2026') {
+    show('v-adm');
+    load();
+  } else {
+    alert('Złe hasło');
+  }
+}
+
+async function load() {
+  var el = document.getElementById('lst');
+  el.textContent = 'Pobieranie...';
+  var res = await gDb().from('zgloszenia').select('*').order('created_at', { ascending: false });
+  if (res.error) {
+    el.textContent = 'Błąd: ' + res.error.message;
+    return;
+  }
+  if (!res.data || !res.data.length) {
+    el.textContent = 'Brak wpisów.';
+    return;
+  }
+  var o = '';
+  res.data.forEach(function(x) {
+    var ch = '';
+    if (x.lista_kontrolna) {
+      ch = '<div>' + x.lista_kontrolna.split('\n').map(function(l) {
+        return '<span class="chip">' + l + '</span>';
+      }).join('') + '</div>';
+    }
+    var im = x.zdjecie ? '<img src="' + x.zdjecie + '">' : '';
+    o += '<div class="card">';
+    o += '<div style="display:flex;justify-content:space-between"><b>' + x.auto + ' • ' + x.kierowca + '</b>';
+    o += '<button onclick="del(' + x.id + ')" style="background:#dc2626;color:#fff;border:0;border-radius:6px;padding:4px 8px">🗑️</button></div>';
+    o += '<small>' + x.typ + ' • ' + new Date(x.created_at).toLocaleString('pl-PL') + '</small>';
+    o += ch + im;
+    o += '<textarea id="o' + x.id + '" rows="2">' + x.opis + '</textarea>';
+    o += '<textarea id="a' + x.id + '" rows="2" placeholder="Uwagi szefa..." style="background:#fffbeb">' + (x.uwagi_admina || '') + '</textarea>';
+    o += '<div style="display:flex;gap:6px"><select onchange="st(' + x.id + ',this.value)">';
+    o += '<option ' + (x.status === 'Do zrobienia' ? 'selected' : '') + '>Do zrobienia</option>';
+    o += '<option ' + (x.status === 'W trakcie' ? 'selected' : '') + '>W trakcie</option>';
+    o += '<option ' + (x.status === 'Gotowe' ? 'selected' : '') + '>Gotowe</option>';
+    o += '</select><button onclick="sv(' + x.id + ')" style="background:#0f172a;color:#fff;border:0;border-radius:8px;padding:0 14px;font-weight:bold">Zapisz</button></div>';
+    o += '</div>';
+  });
+  el.innerHTML = o;
+}
+
+async function add() {
+  var a = document.getElementById('na').value.trim();
+  var o = document.getElementById('no').value.trim();
+  if (!a || !o) return;
+  await gDb().from('zgloszenia').insert([{ auto: a, kierowca: 'SZEF', typ: 'Usterka', opis: o }]);
+  document.getElementById('na').value = '';
+  document.getElementById('no').value = '';
+  load();
+}
+
+async function sv(id) {
+  await gDb().from('zgloszenia').update({
+    opis: document.getElementById('o' + id).value,
+    uwagi_admina: document.getElementById('a' + id).value
+  }).eq('id', id);
+  alert('Zapisano!');
+}
+
+async function st(id, s) {
+  await gDb().from('zgloszenia').update({ status: s }).eq('id', id);
+}
+
+async function del(id) {
+  if (confirm('Usunąć?')) {
+    await gDb().from('zgloszenia').delete().eq('id', id);
+    load();
+  }
+}
 </script>
 </body>
 </html>
