@@ -3,178 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Flotowy NFC</title>
-    <script src="https://tailwindcss.com"></script>
+    <title>Flota Gołaszewski – System NFC</title>
     <script src="https://unpkg.com"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0f172a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; color: #1e293b; }
+        .card { background: #ffffff; width: 100%; max-width: 440px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .header { background: #1e293b; color: #ffffff; padding: 24px 20px; text-align: center; }
+        .badge { display: inline-block; background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(96,165,250,0.3); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .auto-title { font-size: 24px; font-weight: 800; margin-top: 10px; letter-spacing: 0.5px; }
+        .auto-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .content { padding: 22px; }
+        
+        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .tab-btn { border: none; background: transparent; padding: 12px 8px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active-green { background: #ffffff; color: #047857; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .tab-btn.active-red { background: #ffffff; color: #dc2626; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+
+        .field { margin-bottom: 16px; }
+        .label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: 0.4px; }
+        .input, .textarea { width: 100%; padding: 13px 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 15px; background: #f8fafc; color: #0f172a; transition: 0.2s; }
+        .input:focus, .textarea:focus { outline: none; border-color: #2563eb; background: #ffffff; }
+
+        .checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .check-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.15s; }
+        .check-row.checked { background: #ecfdf5; border-color: #10b981; }
+        .check-text { font-size: 14px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+        .check-box { width: 22px; height: 22px; accent-color: #059669; cursor: pointer; }
+
+        .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; color: #ffffff; cursor: pointer; transition: 0.2s; }
+        .btn-green { background: #059669; box-shadow: 0 4px 12px rgba(5,150,105,0.3); }
+        .btn-red { background: #dc2626; box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
+        .submit-btn:disabled { opacity: 0.6; }
+
+        .hidden { display: none !important; }
+        .status-box { padding: 24px; border-radius: 16px; text-align: center; }
+        .status-ok { background: #ecfdf5; border: 1.5px solid #10b981; color: #065f46; }
+        .status-err { background: #fef2f2; border: 1.5px solid #ef4444; color: #991b1b; }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
-        <div class="text-center mb-5">
-            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase">System Flotowy NFC</span>
-            <p id="auto-display" class="text-xl font-mono font-bold text-blue-600 mt-2">Wczytywanie pojazdu...</p>
+    <div class="card">
+        <div class="header">
+            <span class="badge">System Flotowy NFC</span>
+            <div id="auto-display" class="auto-title">Wczytywanie...</div>
+            <div id="auto-sub" class="auto-sub">Wybierz czynność poniżej</div>
         </div>
 
-        <!-- Przełącznik trybu -->
-        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl mb-5">
-            <button type="button" id="tab-checklista" onclick="setMode('Checklista')" class="py-2 text-sm font-bold rounded-lg bg-white text-blue-600 shadow-sm transition">
-                📋 Przed trasą
-            </button>
-            <button type="button" id="tab-usterka" onclick="setMode('Usterka')" class="py-2 text-sm font-bold rounded-lg text-slate-600 transition">
-                🔧 Zgłoś usterkę
-            </button>
+        <div class="content">
+            <div class="tabs">
+                <button type="button" id="tab-checklista" class="tab-btn active-green">📋 Przed trasą</button>
+                <button type="button" id="tab-usterka" class="tab-btn">🔧 Zgłoś usterkę</button>
+            </div>
+
+            <form id="zgloszenie-form">
+                <div id="manual-auto-box" class="field hidden">
+                    <label class="label">Numer rejestracyjny pojazdu</label>
+                    <input type="text" id="auto-input" class="input" placeholder="np. WA 12345" style="font-weight:700;">
+                </div>
+
+                <div class="field">
+                    <label class="label">Imię i nazwisko kierowcy</label>
+                    <input type="text" id="kierowca" class="input" required placeholder="Wpisz swoje imię i nazwisko">
+                </div>
+
+                <div id="sekcja-checklista" class="checklist">
+                    <label class="label">Odhacz sprawdzone przed wyjazdem:</label>
+                    
+                    <label class="check-row"><span class="check-text">🛢️ Poziom oleju</span><input type="checkbox" class="check-box" value="Poziom oleju"></label>
+                    <label class="check-row"><span class="check-text">💡 Oświetlenie pojazdu</span><input type="checkbox" class="check-box" value="Oświetlenie pojazdu"></label>
+                    <label class="check-row"><span class="check-text">🛞 Stan opon</span><input type="checkbox" class="check-box" value="Stan opon"></label>
+                    <label class="check-row"><span class="check-text">🧹 Porządek w kabinie</span><input type="checkbox" class="check-box" value="Porządek w kabinie"></label>
+                    <label class="check-row"><span class="check-text">☣️ Wyposażenie / dokumenty ADR</span><input type="checkbox" class="check-box" value="Wyposażenie / dokumenty ADR"></label>
+                    <label class="check-row"><span class="check-text">🧯 Gaśnica na miejscu</span><input type="checkbox" class="check-box" value="Gaśnica na miejscu"></label>
+                    <label class="check-row"><span class="check-text">📄 Licencja przewoźnika</span><input type="checkbox" class="check-box" value="Licencja przewoźnika"></label>
+                </div>
+
+                <div class="field">
+                    <label id="opis-label" class="label">Dodatkowe uwagi (opcjonalnie)</label>
+                    <textarea id="opis" rows="3" class="textarea" placeholder="Np. brakuje płynu do spryskiwaczy..."></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" class="submit-btn btn-green">✅ Zatwierdź kontrolę przed trasą</button>
+            </form>
+
+            <div id="status-msg" class="hidden"></div>
         </div>
-
-        <form id="zgloszenie-form" class="space-y-4">
-            <div id="manual-auto-box" class="hidden">
-                <label class="block text-sm font-medium text-slate-700">Numer rejestracyjny / Nazwa auta</label>
-                <input type="text" id="auto-input" class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5" placeholder="np. WA 12345">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Imię i nazwisko kierowcy</label>
-                <input type="text" id="kierowca" required class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5" placeholder="Jan Kowalski">
-            </div>
-
-            <!-- SEKCJA CHECKLISTY PRZED TRASĄ -->
-            <div id="sekcja-checklista" class="space-y-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                <p class="text-xs font-bold text-slate-500 uppercase mb-2">Odhacz sprawdzone punkty:</p>
-                
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Poziom oleju">
-                    <span class="text-sm font-medium text-slate-800">🛢️ Sprawdzenie oleju</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Oświetlenie pojazdu">
-                    <span class="text-sm font-medium text-slate-800">💡 Sprawdzenie świateł</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Stan opon i ciśnienie">
-                    <span class="text-sm font-medium text-slate-800">🛞 Sprawdzenie opon</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Porządek w kabinie">
-                    <span class="text-sm font-medium text-slate-800">🧹 Porządek w kabinie</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Wyposażenie i dokumenty ADR">
-                    <span class="text-sm font-medium text-slate-800">☣️ Wyposażenie / dokumenty ADR</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Gaśnica (obecność i ważność)">
-                    <span class="text-sm font-medium text-slate-800">🧯 Gaśnica na miejscu</span>
-                </label>
-
-                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
-                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Licencja przewoźnika w aucie">
-                    <span class="text-sm font-medium text-slate-800">📄 Licencja przewoźnika</span>
-                </label>
-            </div>
-
-            <!-- POLE OPISU -->
-            <div>
-                <label id="opis-label" class="block text-sm font-medium text-slate-700">Dodatkowe uwagi przed wyjazdem (opcjonalnie)</label>
-                <textarea id="opis" rows="3" class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5" placeholder="Wpisz jeśli czegoś brakuje lub wymaga uwagi..."></textarea>
-            </div>
-
-            <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">
-                Zatwierdź kontrolę przed trasą
-            </button>
-        </form>
-
-        <div id="status-msg" class="hidden mt-4 p-4 rounded-lg text-center font-medium"></div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
-        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let currentMode = 'Checklista';
+
+        document.querySelectorAll('.check-box').forEach(cb => {
+            cb.addEventListener('change', function() {
+                this.closest('.check-row').classList.toggle('checked', this.checked);
+            });
+        });
+
+        const tabCheck = document.getElementById('tab-checklista');
+        const tabUsterka = document.getElementById('tab-usterka');
+        const sekcjaCheck = document.getElementById('sekcja-checklista');
+        const opisLabel = document.getElementById('opis-label');
+        const opisInput = document.getElementById('opis');
+        const submitBtn = document.getElementById('submit-btn');
+
+        tabCheck.addEventListener('click', function() {
+            currentMode = 'Checklista';
+            tabCheck.className = 'tab-btn active-green';
+            tabUsterka.className = 'tab-btn';
+            sekcjaCheck.classList.remove('hidden');
+            opisLabel.textContent = 'Dodatkowe uwagi (opcjonalnie)';
+            opisInput.placeholder = 'Np. brakuje płynu do spryskiwaczy...';
+            opisInput.required = false;
+            submitBtn.textContent = '✅ Zatwierdź kontrolę przed trasą';
+            submitBtn.className = 'submit-btn btn-green';
+        });
+
+        tabUsterka.addEventListener('click', function() {
+            currentMode = 'Usterka';
+            tabUsterka.className = 'tab-btn active-red';
+            tabCheck.className = 'tab-btn';
+            sekcjaCheck.classList.add('hidden');
+            opisLabel.textContent = 'Opis usterki dla mechaników';
+            opisInput.placeholder = 'Opisz dokładnie co wymaga naprawy...';
+            opisInput.required = true;
+            submitBtn.textContent = '🔧 Wyślij usterkę do warsztatu';
+            submitBtn.className = 'submit-btn btn-red';
+        });
 
         const urlParams = new URLSearchParams(window.location.search);
         const autoParam = urlParams.get('auto');
         const autoDisplay = document.getElementById('auto-display');
+        const autoSub = document.getElementById('auto-sub');
         const manualAutoBox = document.getElementById('manual-auto-box');
         const autoInput = document.getElementById('auto-input');
 
         if (autoParam) {
-            autoDisplay.textContent = `Pojazd: ${autoParam}`;
+            autoDisplay.textContent = autoParam;
+            autoSub.textContent = 'Pojazd zidentyfikowany przez tag NFC';
             autoInput.value = autoParam;
         } else {
-            autoDisplay.textContent = 'Tryb ręczny (brak tagu NFC)';
+            autoDisplay.textContent = 'Wybór ręczny pojazdu';
+            autoSub.textContent = 'Brak breloka NFC – wpisz numer auta';
             manualAutoBox.classList.remove('hidden');
             autoInput.required = true;
         }
 
-        function setMode(mode) {
-            currentMode = mode;
-            const tabCheck = document.getElementById('tab-checklista');
-            const tabUsterka = document.getElementById('tab-usterka');
-            const sekcjaCheck = document.getElementById('sekcja-checklista');
-            const opisLabel = document.getElementById('opis-label');
-            const opisInput = document.getElementById('opis');
-            const btn = document.getElementById('submit-btn');
-
-            if (mode === 'Checklista') {
-                tabCheck.className = 'py-2 text-sm font-bold rounded-lg bg-white text-blue-600 shadow-sm transition';
-                tabUsterka.className = 'py-2 text-sm font-bold rounded-lg text-slate-600 transition';
-                sekcjaCheck.classList.remove('hidden');
-                opisLabel.textContent = 'Dodatkowe uwagi przed wyjazdem (opcjonalnie)';
-                opisInput.required = false;
-                btn.textContent = 'Zatwierdź kontrolę przed trasą';
-                btn.className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition';
-            } else {
-                tabUsterka.className = 'py-2 text-sm font-bold rounded-lg bg-white text-red-600 shadow-sm transition';
-                tabCheck.className = 'py-2 text-sm font-bold rounded-lg text-slate-600 transition';
-                sekcjaCheck.classList.add('hidden');
-                opisLabel.textContent = 'Co jest do zrobienia? (uwagi dla mechaników)';
-                opisInput.required = true;
-                btn.textContent = 'Wyślij usterkę do mechaników';
-                btn.className = 'w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition';
-            }
-        }
+        const SUPABASE_URL = 'https://supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.getElementById('zgloszenie-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('submit-btn');
             const msg = document.getElementById('status-msg');
             
-            btn.disabled = true;
-            btn.textContent = 'Zapisywanie...';
-
-            let podsumowanieListy = '';
-            if (currentMode === 'Checklista') {
-                const items = document.querySelectorAll('.check-item');
-                const wyniki = [];
-                items.forEach(item => {
-                    wyniki.push(`${item.checked ? '✅' : '❌ BRAK:'} ${item.value}`);
-                });
-                podsumowanieListy = wyniki.join('\n');
-            }
-
-            const opisTekst = document.getElementById('opis').value.trim() || (currentMode === 'Checklista' ? 'Kontrola przed trasą wykonana.' : '');
-
-            const { error } = await bazaDanych.from('zgloszenia').insert([{
-                auto: autoInput.value.trim(),
-                kierowca: document.getElementById('kierowca').value.trim(),
-                typ: currentMode,
-                lista_kontrolna: podsumowanieListy,
-                opis: opisTekst
-            }]);
-
-            if (error) {
-                msg.textContent = 'Błąd bazy danych: ' + error.message;
-                msg.className = 'mt-4 p-4 rounded-lg text-center font-medium bg-red-100 text-red-700 block';
-                btn.disabled = false;
-            } else {
-                document.getElementById('zgloszenie-form').classList.add('hidden');
-                msg.innerHTML = '✅ <b>Zapisano pomyślnie!</b><br>Szerokiej drogi!';
-                msg.className = 'mt-4 p-4 rounded-lg text-center font-medium bg-green-100 text-green-800 block';
-            }
-        });
+            submitBtn.disabled = true;
