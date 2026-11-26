@@ -17,7 +17,7 @@
 
     <div id="admin-panel" class="hidden max-w-6xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h1 class="text-2xl font-bold text-slate-800">Zgłoszenia serwisowe kierowców</h1>
+            <h1 class="text-2xl font-bold text-slate-800">Flota – Kontrole i Zgłoszenia</h1>
             <button onclick="loadData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
                 🔄 Odśwież listę
             </button>
@@ -69,41 +69,53 @@
             }
 
             if (!data || data.length === 0) {
-                container.innerHTML = `<p class="text-slate-500">Brak zgłoszeń w bazie. Dodaj pierwsze powyżej lub przez formularz kierowcy.</p>`;
+                container.innerHTML = `<p class="text-slate-500">Brak wpisów w bazie.</p>`;
                 return;
             }
 
             container.innerHTML = data.map(item => {
                 const date = new Date(item.created_at).toLocaleString('pl-PL');
+                const isChecklista = item.typ === 'Checklista';
+                const badgeTyp = isChecklista 
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">📋 KONTROLA PRZED TRASĄ</span>`
+                    : `<span class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full">🔧 USTERKA</span>`;
+
                 const statusColor = item.status === 'Gotowe' ? 'bg-green-100 text-green-800' : 
-                                    item.status === 'W trakcie' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+                                    item.status === 'W trakcie' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800';
+
+                const checklistaHtml = item.lista_kontrolna 
+                    ? `<div class="bg-slate-50 p-3 rounded-lg border text-sm whitespace-pre-line font-medium text-slate-700">${item.lista_kontrolna}</div>` 
+                    : '';
 
                 return `
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
                     <div class="flex flex-wrap justify-between items-start gap-2 border-b pb-3">
-                        <div>
+                        <div class="flex flex-wrap items-center gap-2">
                             <span class="font-mono font-bold text-lg text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded">${item.auto}</span>
-                            <span class="text-sm text-slate-600 ml-2">Kierowca: <b>${item.kierowca}</b></span>
-                            <div class="text-xs text-slate-400 mt-1">${date}</div>
+                            ${badgeTyp}
+                            <span class="text-sm text-slate-600">Kierowca: <b>${item.kierowca}</b></span>
+                            <span class="text-xs text-slate-400">(${date})</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <select onchange="updateStatus(${item.id}, this.value)" class="text-sm font-semibold rounded-lg px-3 py-1.5 border ${statusColor}">
-                                <option value="Do zrobienia" ${item.status === 'Do zrobienia' ? 'selected' : ''}>🔴 Do zrobienia</option>
+                                <option value="Do zrobienia" ${item.status === 'Do zrobienia' ? 'selected' : ''}>🔴 Do zrobienia / Sprawdzenia</option>
                                 <option value="W trakcie" ${item.status === 'W trakcie' ? 'selected' : ''}>🟡 W trakcie</option>
-                                <option value="Gotowe" ${item.status === 'Gotowe' ? 'selected' : ''}>🟢 Gotowe</option>
+                                <option value="Gotowe" ${item.status === 'Gotowe' ? 'selected' : ''}>🟢 Zatwierdzone / Gotowe</option>
                             </select>
                             <button onclick="deleteEntry(${item.id})" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg text-sm" title="Usuń wpis">🗑️</button>
                         </div>
                     </div>
 
+                    ${checklistaHtml}
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase">Zgłoszenie kierowcy (możesz edytować):</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Uwagi kierowcy:</label>
                             <textarea id="opis-${item.id}" rows="2" class="w-full mt-1 border rounded-lg p-2 text-sm text-slate-800">${item.opis}</textarea>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase">Twoje uwagi dla mechaników:</label>
-                            <textarea id="admin-${item.id}" rows="2" placeholder="Dopisz części do zamówienia, priorytet itp..." class="w-full mt-1 border border-amber-300 bg-amber-50/30 rounded-lg p-2 text-sm text-slate-800">${item.uwagi_admina || ''}</textarea>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Twoje uwagi / odpowiedź:</label>
+                            <textarea id="admin-${item.id}" rows="2" placeholder="Dopisz uwagi dla kierowcy lub mechaników..." class="w-full mt-1 border border-amber-300 bg-amber-50/30 rounded-lg p-2 text-sm text-slate-800">${item.uwagi_admina || ''}</textarea>
                         </div>
                     </div>
 
@@ -122,7 +134,7 @@
             const opis = document.getElementById('new-opis').value.trim();
             if (!auto || !opis) return alert('Wpisz auto i opis!');
 
-            const { error } = await bazaDanych.from('zgloszenia').insert([{ auto, kierowca: 'SZEF / BIURO', opis }]);
+            const { error } = await bazaDanych.from('zgloszenia').insert([{ auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis }]);
             if (error) return alert('Błąd dodawania: ' + error.message);
 
             document.getElementById('new-auto').value = '';
@@ -145,7 +157,7 @@
         }
 
         async function deleteEntry(id) {
-            if (confirm('Na pewno usunąć to zgłoszenie?')) {
+            if (confirm('Na pewno usunąć ten wpis?')) {
                 const { error } = await bazaDanych.from('zgloszenia').delete().eq('id', id);
                 if (error) return alert('Błąd usuwania: ' + error.message);
                 loadData();
