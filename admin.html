@@ -36,7 +36,9 @@
         .chips { display: flex; flex-wrap: wrap; gap: 6px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
         .chip-ok { background: #dcfce7; color: #166534; }
-        .chip-miss { background: #fee2e2; color: #991b1b; }
+        .chip-bad { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .chip-skip { background: #e2e8f0; color: #475569; }
+        .attached-img { max-width: 100%; max-height: 280px; border-radius: 12px; border: 1.5px solid #cbd5e1; object-fit: contain; background: #0f172a; }
         .text-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         @media (min-width: 640px) { .text-grid { grid-template-columns: 1fr 1fr; } }
         .small-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
@@ -62,7 +64,7 @@
             <div class="topbar-inner">
                 <div>
                     <div style="font-size:18px; font-weight:800;">🚛 Flota Gołaszewski</div>
-                    <div style="font-size:11px; color:#94a3b8;">Kontrole przed trasą i zgłoszenia</div>
+                    <div style="font-size:11px; color:#94a3b8;">Kontrole przed trasą, zdjęcia i usterki</div>
                 </div>
                 <button onclick="loadData()" class="refresh-btn">🔄 Odśwież</button>
             </div>
@@ -139,21 +141,55 @@
                 var isChecklista = item.typ === 'Checklista';
                 var borderClass = isChecklista ? 'border-green' : 'border-red';
                 var badgeTyp = isChecklista ? '<span class="type-badge type-green">📋 Przed trasą</span>' : '<span class="type-badge type-red">🔧 Usterka</span>';
+                
                 var checklistaHtml = '';
                 if (item.lista_kontrolna) {
                     var lines = item.lista_kontrolna.split('\n');
                     var chips = '';
                     for (var j = 0; j < lines.length; j++) {
                         var line = lines[j];
-                        var isMissing = line.indexOf('❌') !== -1;
-                        chips += '<span class="chip ' + (isMissing ? 'chip-miss' : 'chip-ok') + '">' + line + '</span>';
+                        var cls = 'chip-skip';
+                        if (line.indexOf('✅') !== -1) cls = 'chip-ok';
+                        else if (line.indexOf('⚠️') !== -1 || line.indexOf('❌') !== -1) cls = 'chip-bad';
+                        chips += '<span class="chip ' + cls + '">' + line + '</span>';
                     }
                     checklistaHtml = '<div class="chips">' + chips + '</div>';
                 }
+
+                var photoHtml = '';
+                if (item.zdjecie && item.zdjecie.length > 20) {
+                    photoHtml = '<div><div class="small-label">📷 Załączone zdjęcie</div><img src="' + item.zdjecie + '" class="attached-img" alt="Zdjęcie pojazdu"></div>';
+                }
+
                 var s1 = item.status === 'Do zrobienia' ? 'selected' : '';
                 var s2 = item.status === 'W trakcie' ? 'selected' : '';
                 var s3 = item.status === 'Gotowe' ? 'selected' : '';
-                html += '<div class="item-card ' + borderClass + '"><div class="item-top"><div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;"><span class="auto-badge">' + item.auto + '</span>' + badgeTyp + '<span style="font-size:14px; font-weight:700;">' + item.kierowca + '</span><span style="font-size:12px; color:#64748b;">• ' + date + '</span></div><button onclick="deleteEntry(' + item.id + ')" class="del-btn">🗑️ Usuń</button></div>' + checklistaHtml + '<div class="text-grid"><div><label class="small-label">Uwagi kierowcy</label><textarea id="opis-' + item.id + '" rows="2" class="textarea">' + item.opis + '</textarea></div><div><label class="small-label" style="color:#b45309;">Twoje uwagi / dla mechaników</label><textarea id="admin-' + item.id + '" rows="2" placeholder="Dopisz uwagi..." class="textarea textarea-admin">' + (item.uwagi_admina || '') + '</textarea></div></div><div class="actions"><select onchange="updateStatus(' + item.id + ', this.value)" class="status-select"><option value="Do zrobienia" ' + s1 + '>🔴 Nowe / Do zrobienia</option><option value="W trakcie" ' + s2 + '>🟡 W trakcie</option><option value="Gotowe" ' + s3 + '>🟢 Zatwierdzone / Gotowe</option></select><button onclick="saveChanges(' + item.id + ')" class="save-btn">💾 Zapisz zmiany</button></div></div>';
+
+                html += '<div class="item-card ' + borderClass + '">' +
+                    '<div class="item-top">' +
+                        '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">' +
+                            '<span class="auto-badge">' + item.auto + '</span>' +
+                            badgeTyp +
+                            '<span style="font-size:14px; font-weight:700;">' + item.kierowca + '</span>' +
+                            '<span style="font-size:12px; color:#64748b;">• ' + date + '</span>' +
+                        '</div>' +
+                        '<button onclick="deleteEntry(' + item.id + ')" class="del-btn">🗑️ Usuń</button>' +
+                    '</div>' +
+                    checklistaHtml +
+                    photoHtml +
+                    '<div class="text-grid">' +
+                        '<div><label class="small-label">Uwagi kierowcy</label><textarea id="opis-' + item.id + '" rows="2" class="textarea">' + item.opis + '</textarea></div>' +
+                        '<div><label class="small-label" style="color:#b45309;">Twoje uwagi / dla mechaników</label><textarea id="admin-' + item.id + '" rows="2" placeholder="Dopisz uwagi..." class="textarea textarea-admin">' + (item.uwagi_admina || '') + '</textarea></div>' +
+                    '</div>' +
+                    '<div class="actions">' +
+                        '<select onchange="updateStatus(' + item.id + ', this.value)" class="status-select">' +
+                            '<option value="Do zrobienia" ' + s1 + '>🔴 Nowe / Do zrobienia</option>' +
+                            '<option value="W trakcie" ' + s2 + '>🟡 W trakcie</option>' +
+                            '<option value="Gotowe" ' + s3 + '>🟢 Zatwierdzone / Gotowe</option>' +
+                        '</select>' +
+                        '<button onclick="saveChanges(' + item.id + ')" class="save-btn">💾 Zapisz zmiany</button>' +
+                    '</div>' +
+                '</div>';
             }
             container.innerHTML = html;
         }
