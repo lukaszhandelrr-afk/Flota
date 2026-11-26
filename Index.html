@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zgłoszenie serwisowe</title>
+    <script src="https://tailwindcss.com"></script>
+    <script src="https://unpkg.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
+        <div class="text-center mb-6">
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase">System Flotowy NFC</span>
+            <h1 class="text-2xl font-bold text-slate-800 mt-2">Zgłoś uwagi do auta</h1>
+            <p id="auto-display" class="text-lg font-mono font-bold text-blue-600 mt-1">Wczytywanie pojazdu...</p>
+        </div>
+
+        <form id="zgloszenie-form" class="space-y-4">
+            <div id="manual-auto-box" class="hidden">
+                <label class="block text-sm font-medium text-slate-700">Numer rejestracyjny / Nazwa auta</label>
+                <input type="text" id="auto-input" class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="np. WA 12345">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Imię i nazwisko kierowcy</label>
+                <input type="text" id="kierowca" required class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Jan Kowalski">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Co jest do zrobienia? (uwagi dla mechaników)</label>
+                <textarea id="opis" rows="4" required class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Opisz usterki, braki płynów, stuki itp..."></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                Wyślij do mechaników
+            </button>
+        </form>
+
+        <div id="status-msg" class="hidden mt-4 p-4 rounded-lg text-center font-medium"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoParam = urlParams.get('auto');
+        
+        const autoDisplay = document.getElementById('auto-display');
+        const manualAutoBox = document.getElementById('manual-auto-box');
+        const autoInput = document.getElementById('auto-input');
+
+        if (autoParam) {
+            autoDisplay.textContent = `Pojazd: ${autoParam}`;
+            autoInput.value = autoParam;
+        } else {
+            autoDisplay.textContent = 'Tryb ręczny (brak tagu NFC)';
+            manualAutoBox.classList.remove('hidden');
+            autoInput.required = true;
+        }
+
+        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('zgloszenie-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const msg = document.getElementById('status-msg');
+            
+            btn.disabled = true;
+            btn.textContent = 'Wysyłanie...';
+
+            const { error } = await bazaDanych.from('zgloszenia').insert([{
+                auto: autoInput.value.trim(),
+                kierowca: document.getElementById('kierowca').value.trim(),
+                opis: document.getElementById('opis').value.trim()
+            }]);
+
+            if (error) {
+                msg.textContent = 'Błąd bazy danych: ' + error.message;
+                msg.className = 'mt-4 p-4 rounded-lg text-center font-medium bg-red-100 text-red-700 block';
+                btn.disabled = false;
+                btn.textContent = 'Wyślij do mechaników';
+            } else {
+                document.getElementById('zgloszenie-form').classList.add('hidden');
+                msg.innerHTML = '✅ <b>Zapisano!</b><br>Uwagi zostały przekazane do warsztatu.';
+                msg.className = 'mt-4 p-4 rounded-lg text-center font-medium bg-green-100 text-green-800 block';
+            }
+        });
+    </script>
+</body>
+</html>
