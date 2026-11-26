@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/baza/:path*",
-      "destination": "https://supabase.co*"
+      "destination": "https://supabase.com"
     }
   ]
 }
