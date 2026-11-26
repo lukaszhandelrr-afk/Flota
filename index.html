@@ -8,26 +8,32 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0f172a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; color: #1e293b; }
-        .card { background: #ffffff; width: 100%; max-width: 440px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .card { background: #ffffff; width: 100%; max-width: 460px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
         .header { background: #1e293b; color: #ffffff; padding: 24px 20px; text-align: center; }
         .badge { display: inline-block; background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(96,165,250,0.3); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; letter-spacing: 0.5px; text-transform: uppercase; }
         .auto-title { font-size: 24px; font-weight: 800; margin-top: 10px; letter-spacing: 0.5px; }
         .auto-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
-        .content { padding: 22px; }
-        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .content { padding: 20px; }
+        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
         .tab-btn { border: none; background: transparent; padding: 12px 8px; border-radius: 12px; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; transition: 0.2s; }
         .tab-btn.active-green { background: #ffffff; color: #047857; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
         .tab-btn.active-red { background: #ffffff; color: #dc2626; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
         .field { margin-bottom: 16px; }
         .label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: 0.4px; }
-        .input, .textarea { width: 100%; padding: 13px 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 15px; background: #f8fafc; color: #0f172a; transition: 0.2s; }
+        .input, .textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 15px; background: #f8fafc; color: #0f172a; }
         .input:focus, .textarea:focus { outline: none; border-color: #2563eb; background: #ffffff; }
         .checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-        .check-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.15s; }
-        .check-row.checked { background: #ecfdf5; border-color: #10b981; }
-        .check-text { font-size: 14px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 10px; }
-        .check-box { width: 22px; height: 22px; accent-color: #059669; cursor: pointer; }
-        .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; color: #ffffff; cursor: pointer; transition: 0.2s; }
+        .check-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; transition: 0.15s; }
+        .check-row.state-ok { background: #ecfdf5; border-color: #10b981; }
+        .check-row.state-bad { background: #fef2f2; border-color: #ef4444; }
+        .check-text { font-size: 13px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+        .btn-group { display: flex; gap: 6px; flex-shrink: 0; }
+        .opt-btn { border: 1.5px solid #cbd5e1; background: #ffffff; color: #64748b; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+        .opt-btn.sel-ok { background: #059669; border-color: #059669; color: #ffffff; }
+        .opt-btn.sel-bad { background: #dc2626; border-color: #dc2626; color: #ffffff; }
+        .photo-box { border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 14px; padding: 14px; text-align: center; cursor: pointer; display: block; }
+        .photo-preview { max-width: 100%; max-height: 180px; border-radius: 10px; margin-top: 10px; display: none; margin-left: auto; margin-right: auto; }
+        .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; color: #ffffff; cursor: pointer; }
         .btn-green { background: #059669; box-shadow: 0 4px 12px rgba(5,150,105,0.3); }
         .btn-red { background: #dc2626; box-shadow: 0 4px 12px rgba(220,38,38,0.3); }
         .submit-btn:disabled { opacity: 0.6; }
@@ -59,18 +65,20 @@
                     <input type="text" id="kierowca" class="input" required placeholder="Wpisz swoje imię i nazwisko">
                 </div>
                 <div id="sekcja-checklista" class="checklist">
-                    <label class="label">Odhacz sprawdzone przed wyjazdem:</label>
-                    <label class="check-row"><span class="check-text">🛢️ Poziom oleju</span><input type="checkbox" class="check-box" value="Poziom oleju"></label>
-                    <label class="check-row"><span class="check-text">💡 Oświetlenie pojazdu</span><input type="checkbox" class="check-box" value="Oświetlenie pojazdu"></label>
-                    <label class="check-row"><span class="check-text">🛞 Stan opon</span><input type="checkbox" class="check-box" value="Stan opon"></label>
-                    <label class="check-row"><span class="check-text">🧹 Porządek w kabinie</span><input type="checkbox" class="check-box" value="Porządek w kabinie"></label>
-                    <label class="check-row"><span class="check-text">☣️ Wyposażenie / dokumenty ADR</span><input type="checkbox" class="check-box" value="Wyposażenie / dokumenty ADR"></label>
-                    <label class="check-row"><span class="check-text">🧯 Gaśnica na miejscu</span><input type="checkbox" class="check-box" value="Gaśnica na miejscu"></label>
-                    <label class="check-row"><span class="check-text">📄 Licencja przewoźnika</span><input type="checkbox" class="check-box" value="Licencja przewoźnika"></label>
+                    <label class="label">Zaznacz stan każdego punktu (OK lub PROBLEM):</label>
+                    <div id="checklist-items"></div>
+                </div>
+                <div class="field">
+                    <label class="label">📷 Dodaj zdjęcie (opcjonalnie – np. rysa, brud, usterka)</label>
+                    <label class="photo-box">
+                        <span id="photo-label" style="font-size:13px; font-weight:700; color:#2563eb;">📸 Kliknij, aby zrobić zdjęcie lub wybrać z galerii</span>
+                        <input type="file" id="photo-input" accept="image/*" style="display:none;">
+                        <img id="photo-preview" class="photo-preview" alt="Podgląd">
+                    </label>
                 </div>
                 <div class="field">
                     <label id="opis-label" class="label">Dodatkowe uwagi (opcjonalnie)</label>
-                    <textarea id="opis" rows="3" class="textarea" placeholder="Np. brakuje płynu do spryskiwaczy..."></textarea>
+                    <textarea id="opis" rows="3" class="textarea" placeholder="Opisz np. co jest nie tak, zarysowania itp..."></textarea>
                 </div>
                 <button type="submit" id="submit-btn" class="submit-btn btn-green">✅ Zatwierdź kontrolę przed trasą</button>
             </form>
@@ -79,13 +87,79 @@
     </div>
     <script>
         var currentMode = 'Checklista';
+        var compressedPhoto = '';
 
-        var checkboxes = document.querySelectorAll('.check-box');
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].addEventListener('change', function() {
-                this.closest('.check-row').classList.toggle('checked', this.checked);
-            });
+        var punktyKontrolne = [
+            { icon: '🛢️', name: 'Poziom oleju' },
+            { icon: '💡', name: 'Oświetlenie pojazdu' },
+            { icon: '🛞', name: 'Stan opon' },
+            { icon: '🧹', name: 'Porządek w kabinie' },
+            { icon: '☣️', name: 'Wyposażenie / dokumenty ADR' },
+            { icon: '🧯', name: 'Gaśnica na miejscu' },
+            { icon: '📄', name: 'Licencja przewoźnika' }
+        ];
+
+        var listContainer = document.getElementById('checklist-items');
+        var listHtml = '';
+        for (var i = 0; i < punktyKontrolne.length; i++) {
+            var p = punktyKontrolne[i];
+            listHtml += '<div class="check-row" data-name="' + p.name + '" data-status="nie_sprawdzono">' +
+                '<span class="check-text">' + p.icon + ' ' + p.name + '</span>' +
+                '<div class="btn-group">' +
+                    '<button type="button" class="opt-btn" onclick="setCheck(this, \'ok\')">✅ OK</button>' +
+                    '<button type="button" class="opt-btn" onclick="setCheck(this, \'bad\')">⚠️ Źle</button>' +
+                '</div>' +
+            '</div>';
         }
+        listContainer.innerHTML = listHtml;
+
+        function setCheck(btn, status) {
+            var row = btn.closest('.check-row');
+            var btns = row.querySelectorAll('.opt-btn');
+            btns[0].className = 'opt-btn';
+            btns[1].className = 'opt-btn';
+
+            if (row.getAttribute('data-status') === status) {
+                row.setAttribute('data-status', 'nie_sprawdzono');
+                row.className = 'check-row';
+            } else {
+                row.setAttribute('data-status', status);
+                if (status === 'ok') {
+                    row.className = 'check-row state-ok';
+                    btns[0].className = 'opt-btn sel-ok';
+                } else {
+                    row.className = 'check-row state-bad';
+                    btns[1].className = 'opt-btn sel-bad';
+                }
+            }
+        }
+
+        // Kompresja zdjęcia z telefonu
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('photo-label').textContent = '⏳ Przetwarzanie zdjęcia...';
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var maxW = 800;
+                    var scale = img.width > maxW ? (maxW / img.width) : 1;
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    compressedPhoto = canvas.toDataURL('image/jpeg', 0.65);
+                    var prev = document.getElementById('photo-preview');
+                    prev.src = compressedPhoto;
+                    prev.style.display = 'block';
+                    document.getElementById('photo-label').textContent = '✅ Zdjęcie gotowe (kliknij, aby zmienić)';
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
 
         var tabCheck = document.getElementById('tab-checklista');
         var tabUsterka = document.getElementById('tab-usterka');
@@ -100,7 +174,6 @@
             tabUsterka.className = 'tab-btn';
             sekcjaCheck.classList.remove('hidden');
             opisLabel.textContent = 'Dodatkowe uwagi (opcjonalnie)';
-            opisInput.placeholder = 'Np. brakuje płynu do spryskiwaczy...';
             opisInput.required = false;
             submitBtn.textContent = '✅ Zatwierdź kontrolę przed trasą';
             submitBtn.className = 'submit-btn btn-green';
@@ -112,7 +185,6 @@
             tabCheck.className = 'tab-btn';
             sekcjaCheck.classList.add('hidden');
             opisLabel.textContent = 'Opis usterki dla mechaników';
-            opisInput.placeholder = 'Opisz dokładnie co wymaga naprawy...';
             opisInput.required = true;
             submitBtn.textContent = '🔧 Wyślij usterkę do warsztatu';
             submitBtn.className = 'submit-btn btn-red';
@@ -143,29 +215,33 @@
         document.getElementById('zgloszenie-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             var msg = document.getElementById('status-msg');
-            
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Zapisywanie...';
+            submitBtn.textContent = 'Wysyłanie...';
 
             var podsumowanieListy = '';
             if (currentMode === 'Checklista') {
-                var items = document.querySelectorAll('.check-box');
+                var rows = document.querySelectorAll('.check-row');
                 var wyniki = [];
-                for (var j = 0; j < items.length; j++) {
-                    var item = items[j];
-                    wyniki.push((item.checked ? '✅ ' : '❌ BRAK: ') + item.value);
+                for (var j = 0; j < rows.length; j++) {
+                    var r = rows[j];
+                    var st = r.getAttribute('data-status');
+                    var nm = r.getAttribute('data-name');
+                    if (st === 'ok') wyniki.push('✅ ' + nm);
+                    else if (st === 'bad') wyniki.push('⚠️ PROBLEM: ' + nm);
+                    else wyniki.push('⬜ Pominięto: ' + nm);
                 }
                 podsumowanieListy = wyniki.join('\n');
             }
 
-            var opisTekst = document.getElementById('opis').value.trim() || (currentMode === 'Checklista' ? 'Kontrola przed trasą wykonana bez uwag.' : '');
+            var opisTekst = document.getElementById('opis').value.trim() || (currentMode === 'Checklista' ? 'Kontrola przed trasą wykonana.' : '');
 
             var res = await bazaDanych.from('zgloszenia').insert([{
                 auto: autoInput.value.trim(),
                 kierowca: document.getElementById('kierowca').value.trim(),
                 typ: currentMode,
                 lista_kontrolna: podsumowanieListy,
-                opis: opisTekst
+                opis: opisTekst,
+                zdjecie: compressedPhoto
             }]);
 
             if (res.error) {
@@ -174,7 +250,7 @@
                 submitBtn.disabled = false;
             } else {
                 document.getElementById('zgloszenie-form').classList.add('hidden');
-                msg.innerHTML = '<div style="font-size:36px; margin-bottom:8px;">✅</div><div style="font-size:18px; font-weight:800;">Zapisano pomyślnie!</div><div style="font-size:13px; margin-top:4px;">Dane zostały przesłane do systemu. Szerokiej drogi!</div>';
+                msg.innerHTML = '<div style="font-size:36px; margin-bottom:8px;">✅</div><div style="font-size:18px; font-weight:800;">Zapisano pomyślnie!</div><div style="font-size:13px; margin-top:4px;">Dane i zdjęcie zostały przesłane. Szerokiej drogi!</div>';
                 msg.className = 'status-box status-ok';
             }
         });
