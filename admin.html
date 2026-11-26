@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Zarządzania Flotą</title>
+    <script src="https://tailwindcss.com"></script>
+    <script src="https://unpkg.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 md:p-8">
+
+    <div id="login-screen" class="max-w-sm mx-auto bg-white p-6 rounded-xl shadow-md mt-20">
+        <h2 class="text-xl font-bold mb-4 text-slate-800">Panel Administratora</h2>
+        <input type="password" id="pass-input" onkeypress="if(event.key==='Enter') checkPass()" placeholder="Podaj hasło" class="w-full border p-2.5 rounded-lg mb-3">
+        <button onclick="checkPass()" class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-semibold hover:bg-slate-700">Zaloguj</button>
+    </div>
+
+    <div id="admin-panel" class="hidden max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h1 class="text-2xl font-bold text-slate-800">Zgłoszenia serwisowe kierowców</h1>
+            <button onclick="loadData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                🔄 Odśwież listę
+            </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-slate-200">
+            <h3 class="font-bold text-sm text-slate-700 mb-3 uppercase">Dodaj własne zlecenie dla mechaników</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input type="text" id="new-auto" placeholder="Nr auta (np. SCANIA 01)" class="border p-2 rounded-lg text-sm">
+                <input type="text" id="new-opis" placeholder="Co trzeba zrobić?" class="border p-2 rounded-lg text-sm md:col-span-2">
+                <button onclick="addEntry()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">
+                    + Dodaj wpis
+                </button>
+            </div>
+        </div>
+
+        <div id="lista-zgloszen" class="space-y-4">
+            <p class="text-slate-500">Ładowanie danych...</p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+        const HASLO_ADMINA = 'Flota2026'; 
+        
+        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function checkPass() {
+            if (document.getElementById('pass-input').value === HASLO_ADMINA) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadData();
+            } else {
+                alert('Błędne hasło!');
+            }
+        }
+
+        async function loadData() {
+            const container = document.getElementById('lista-zgloszen');
+            const { data, error } = await bazaDanych
+                .from('zgloszenia')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                container.innerHTML = `<p class="text-red-600 font-bold">Błąd bazy danych: ${error.message}</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="text-slate-500">Brak zgłoszeń w bazie. Dodaj pierwsze powyżej lub przez formularz kierowcy.</p>`;
+                return;
+            }
+
+            container.innerHTML = data.map(item => {
+                const date = new Date(item.created_at).toLocaleString('pl-PL');
+                const statusColor = item.status === 'Gotowe' ? 'bg-green-100 text-green-800' : 
+                                    item.status === 'W trakcie' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+
+                return `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
+                    <div class="flex flex-wrap justify-between items-start gap-2 border-b pb-3">
+                        <div>
+                            <span class="font-mono font-bold text-lg text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded">${item.auto}</span>
+                            <span class="text-sm text-slate-600 ml-2">Kierowca: <b>${item.kierowca}</b></span>
+                            <div class="text-xs text-slate-400 mt-1">${date}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select onchange="updateStatus(${item.id}, this.value)" class="text-sm font-semibold rounded-lg px-3 py-1.5 border ${statusColor}">
+                                <option value="Do zrobienia" ${item.status === 'Do zrobienia' ? 'selected' : ''}>🔴 Do zrobienia</option>
+                                <option value="W trakcie" ${item.status === 'W trakcie' ? 'selected' : ''}>🟡 W trakcie</option>
+                                <option value="Gotowe" ${item.status === 'Gotowe' ? 'selected' : ''}>🟢 Gotowe</option>
+                            </select>
+                            <button onclick="deleteEntry(${item.id})" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg text-sm" title="Usuń wpis">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Zgłoszenie kierowcy (możesz edytować):</label>
+                            <textarea id="opis-${item.id}" rows="2" class="w-full mt-1 border rounded-lg p-2 text-sm text-slate-800">${item.opis}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Twoje uwagi dla mechaników:</label>
+                            <textarea id="admin-${item.id}" rows="2" placeholder="Dopisz części do zamówienia, priorytet itp..." class="w-full mt-1 border border-amber-300 bg-amber-50/30 rounded-lg p-2 text-sm text-slate-800">${item.uwagi_admina || ''}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="saveChanges(${item.id})" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg">
+                            💾 Zapisz zmiany w tekście
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function addEntry() {
+            const auto = document.getElementById('new-auto').value.trim();
+            const opis = document.getElementById('new-opis').value.trim();
+            if (!auto || !opis) return alert('Wpisz auto i opis!');
+
+            const { error } = await bazaDanych.from('zgloszenia').insert([{ auto, kierowca: 'SZEF / BIURO', opis }]);
+            if (error) return alert('Błąd dodawania: ' + error.message);
+
+            document.getElementById('new-auto').value = '';
+            document.getElementById('new-opis').value = '';
+            loadData();
+        }
+
+        async function saveChanges(id) {
+            const opis = document.getElementById(`opis-${id}`).value;
+            const uwagi_admina = document.getElementById(`admin-${id}`).value;
+            const { error } = await bazaDanych.from('zgloszenia').update({ opis, uwagi_admina }).eq('id', id);
+            if (error) return alert('Błąd zapisu: ' + error.message);
+            alert('Zapisano zmiany!');
+        }
+
+        async function updateStatus(id, status) {
+            const { error } = await bazaDanych.from('zgloszenia').update({ status }).eq('id', id);
+            if (error) return alert('Błąd zmiany statusu: ' + error.message);
+            loadData();
+        }
+
+        async function deleteEntry(id) {
+            if (confirm('Na pewno usunąć to zgłoszenie?')) {
+                const { error } = await bazaDanych.from('zgloszenia').delete().eq('id', id);
+                if (error) return alert('Błąd usuwania: ' + error.message);
+                loadData();
+            }
+        }
+    </script>
+</body>
+</html>
