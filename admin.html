@@ -118,20 +118,24 @@
 
         async function loadData() {
             var container = document.getElementById('lista-zgloszen');
-            var res = await bazaDanych.from('zgloszenia').select('*').order('created_at', { ascending: false });
-            if (res.error) {
-                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy: ' + res.error.message + '</div>';
-                return;
+            try {
+                var res = await bazaDanych.from('zgloszenia').select('*').order('created_at', { ascending: false });
+                if (res.error) {
+                    container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy: ' + res.error.message + '</div>';
+                    return;
+                }
+                allData = res.data || [];
+                renderList();
+            } catch (err) {
+                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd połączenia: ' + err.message + '</div>';
             }
-            allData = res.data || [];
-            renderList();
         }
 
         function renderList() {
             var container = document.getElementById('lista-zgloszen');
             var filtered = currentFilter === 'ALL' ? allData : allData.filter(function(item) { return item.typ === currentFilter; });
             if (filtered.length === 0) {
-                container.innerHTML = '<div style="background:#fff; padding:28px; border-radius:16px; text-align:center; color:#94a3b8;">Brak wpisów w tej kategorii.</div>';
+                container.innerHTML = '<div style="background:#fff; padding:28px; border-radius:16px; text-align:center; color:#94a3b8;">Brak wpisów w bazie danych.</div>';
                 return;
             }
             var html = '';
@@ -165,31 +169,7 @@
                 var s2 = item.status === 'W trakcie' ? 'selected' : '';
                 var s3 = item.status === 'Gotowe' ? 'selected' : '';
 
-                html += '<div class="item-card ' + borderClass + '">' +
-                    '<div class="item-top">' +
-                        '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">' +
-                            '<span class="auto-badge">' + item.auto + '</span>' +
-                            badgeTyp +
-                            '<span style="font-size:14px; font-weight:700;">' + item.kierowca + '</span>' +
-                            '<span style="font-size:12px; color:#64748b;">• ' + date + '</span>' +
-                        '</div>' +
-                        '<button onclick="deleteEntry(' + item.id + ')" class="del-btn">🗑️ Usuń</button>' +
-                    '</div>' +
-                    checklistaHtml +
-                    photoHtml +
-                    '<div class="text-grid">' +
-                        '<div><label class="small-label">Uwagi kierowcy</label><textarea id="opis-' + item.id + '" rows="2" class="textarea">' + item.opis + '</textarea></div>' +
-                        '<div><label class="small-label" style="color:#b45309;">Twoje uwagi / dla mechaników</label><textarea id="admin-' + item.id + '" rows="2" placeholder="Dopisz uwagi..." class="textarea textarea-admin">' + (item.uwagi_admina || '') + '</textarea></div>' +
-                    '</div>' +
-                    '<div class="actions">' +
-                        '<select onchange="updateStatus(' + item.id + ', this.value)" class="status-select">' +
-                            '<option value="Do zrobienia" ' + s1 + '>🔴 Nowe / Do zrobienia</option>' +
-                            '<option value="W trakcie" ' + s2 + '>🟡 W trakcie</option>' +
-                            '<option value="Gotowe" ' + s3 + '>🟢 Zatwierdzone / Gotowe</option>' +
-                        '</select>' +
-                        '<button onclick="saveChanges(' + item.id + ')" class="save-btn">💾 Zapisz zmiany</button>' +
-                    '</div>' +
-                '</div>';
+                html += '<div class="item-card ' + borderClass + '"><div class="item-top"><div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;"><span class="auto-badge">' + item.auto + '</span>' + badgeTyp + '<span style="font-size:14px; font-weight:700;">' + item.kierowca + '</span><span style="font-size:12px; color:#64748b;">• ' + date + '</span></div><button onclick="deleteEntry(' + item.id + ')" class="del-btn">🗑️ Usuń</button></div>' + checklistaHtml + photoHtml + '<div class="text-grid"><div><label class="small-label">Uwagi kierowcy</label><textarea id="opis-' + item.id + '" rows="2" class="textarea">' + item.opis + '</textarea></div><div><label class="small-label" style="color:#b45309;">Twoje uwagi / dla mechaników</label><textarea id="admin-' + item.id + '" rows="2" placeholder="Dopisz uwagi..." class="textarea textarea-admin">' + (item.uwagi_admina || '') + '</textarea></div></div><div class="actions"><select onchange="updateStatus(' + item.id + ', this.value)" class="status-select"><option value="Do zrobienia" ' + s1 + '>🔴 Nowe / Do zrobienia</option><option value="W trakcie" ' + s2 + '>🟡 W trakcie</option><option value="Gotowe" ' + s3 + '>🟢 Zatwierdzone / Gotowe</option></select><button onclick="saveChanges(' + item.id + ')" class="save-btn">💾 Zapisz zmiany</button></div></div>';
             }
             container.innerHTML = html;
         }
