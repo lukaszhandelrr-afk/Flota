@@ -4,47 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Zarządzania Flotą</title>
-    <script src="https://tailwindcss.com"></script>
     <script src="https://unpkg.com"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+        .hidden { display: none !important; }
+        .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #0f172a; }
+        .login-card { background: #ffffff; width: 100%; max-width: 380px; padding: 32px 24px; border-radius: 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .login-input { width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 16px; text-align: center; margin: 16px 0; }
+        .login-btn { width: 100%; padding: 14px; background: #0f172a; color: #ffffff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+        .topbar { background: #0f172a; color: #ffffff; padding: 16px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .topbar-inner { max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .refresh-btn { background: #2563eb; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .container { max-width: 900px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+        .add-box { background: #ffffff; padding: 18px; border-radius: 18px; border: 1px solid #e2e8f0; }
+        .add-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+        @media (min-width: 640px) { .add-grid { grid-template-columns: 1fr 2fr auto; } }
+        .input { width: 100%; padding: 11px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: #f8fafc; }
+        .add-btn { background: #059669; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-btn { padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; }
+        .filter-btn.active { background: #0f172a; color: #ffffff; border-color: #0f172a; }
+        .item-card { background: #ffffff; border-radius: 18px; padding: 18px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 14px; }
+        .border-green { border-left: 5px solid #10b981; }
+        .border-red { border-left: 5px solid #ef4444; }
+        .item-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
+        .auto-badge { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 15px; }
+        .type-badge { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+        .type-green { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .type-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+        .chip-ok { background: #dcfce7; color: #166534; }
+        .chip-miss { background: #fee2e2; color: #991b1b; }
+        .text-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 640px) { .text-grid { grid-template-columns: 1fr 1fr; } }
+        .small-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+        .textarea { width: 100%; padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; background: #f8fafc; }
+        .textarea-admin { background: #fffbeb; border-color: #fcd34d; }
+        .actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .status-select { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; }
+        .save-btn { background: #1e293b; color: #ffffff; border: none; padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .del-btn { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-8">
-
-    <div id="login-screen" class="max-w-sm mx-auto bg-white p-6 rounded-xl shadow-md mt-20">
-        <h2 class="text-xl font-bold mb-4 text-slate-800">Panel Administratora</h2>
-        <input type="password" id="pass-input" onkeypress="if(event.key==='Enter') checkPass()" placeholder="Podaj hasło" class="w-full border p-2.5 rounded-lg mb-3">
-        <button onclick="checkPass()" class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-semibold hover:bg-slate-700">Zaloguj</button>
-    </div>
-
-    <div id="admin-panel" class="hidden max-w-6xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h1 class="text-2xl font-bold text-slate-800">Flota – Kontrole i Zgłoszenia</h1>
-            <button onclick="loadData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
-                🔄 Odśwież listę
-            </button>
+<body>
+    <div id="login-screen" class="login-wrap">
+        <div class="login-card">
+            <span style="background:#f1f5f9; padding:4px 12px; border-radius:99px; font-size:11px; font-weight:700; color:#475569;">STREFA ZARZĄDZANIA</span>
+            <h2 style="margin-top:12px; font-size:22px;">Panel Floty</h2>
+            <input type="password" id="pass-input" class="login-input" onkeypress="if(event.key==='Enter') checkPass()" placeholder="Wpisz hasło dostępu">
+            <button onclick="checkPass()" class="login-btn">Zaloguj się</button>
         </div>
-
-        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-slate-200">
-            <h3 class="font-bold text-sm text-slate-700 mb-3 uppercase">Dodaj własne zlecenie dla mechaników</h3>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="text" id="new-auto" placeholder="Nr auta (np. SCANIA 01)" class="border p-2 rounded-lg text-sm">
-                <input type="text" id="new-opis" placeholder="Co trzeba zrobić?" class="border p-2 rounded-lg text-sm md:col-span-2">
-                <button onclick="addEntry()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-sm">
-                    + Dodaj wpis
-                </button>
+    </div>
+    <div id="admin-panel" class="hidden">
+        <div class="topbar">
+            <div class="topbar-inner">
+                <div>
+                    <div style="font-size:18px; font-weight:800;">🚛 Flota Gołaszewski</div>
+                    <div style="font-size:11px; color:#94a3b8;">Kontrole przed trasą i zgłoszenia</div>
+                </div>
+                <button onclick="loadData()" class="refresh-btn">🔄 Odśwież</button>
             </div>
         </div>
-
-        <div id="lista-zgloszen" class="space-y-4">
-            <p class="text-slate-500">Ładowanie danych...</p>
+        <div class="container">
+            <div class="add-box">
+                <div class="small-label">➕ Dodaj własne zlecenie dla mechaników</div>
+                <div class="add-grid">
+                    <input type="text" id="new-auto" class="input" placeholder="Nr auta (np. SCANIA 01)">
+                    <input type="text" id="new-opis" class="input" placeholder="Co trzeba zrobić?">
+                    <button onclick="addEntry()" class="add-btn">Dodaj wpis</button>
+                </div>
+            </div>
+            <div class="filters">
+                <button onclick="setFilter('ALL')" id="filter-ALL" class="filter-btn active">Wszystkie</button>
+                <button onclick="setFilter('Usterka')" id="filter-Usterka" class="filter-btn">🔧 Tylko usterki</button>
+                <button onclick="setFilter('Checklista')" id="filter-Checklista" class="filter-btn">📋 Kontrole przed trasą</button>
+            </div>
+            <div id="lista-zgloszen" style="display:flex; flex-direction:column; gap:14px;">
+                <p style="text-align:center; color:#64748b; padding:24px;">Ładowanie danych...</p>
+            </div>
         </div>
     </div>
-
     <script>
-        const SUPABASE_URL = 'https://supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
-        const HASLO_ADMINA = 'Flota2026'; 
-        
-        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        var SUPABASE_URL = 'https://supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+        var HASLO_ADMINA = 'Flota2026'; 
+        var bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        var allData = [];
+        var currentFilter = 'ALL';
 
         function checkPass() {
             if (document.getElementById('pass-input').value === HASLO_ADMINA) {
@@ -56,110 +104,89 @@
             }
         }
 
+        function setFilter(filter) {
+            currentFilter = filter;
+            var tabs = ['ALL', 'Usterka', 'Checklista'];
+            for (var i = 0; i < tabs.length; i++) {
+                var f = tabs[i];
+                document.getElementById('filter-' + f).className = (f === filter) ? 'filter-btn active' : 'filter-btn';
+            }
+            renderList();
+        }
+
         async function loadData() {
-            const container = document.getElementById('lista-zgloszen');
-            const { data, error } = await bazaDanych
-                .from('zgloszenia')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                container.innerHTML = `<p class="text-red-600 font-bold">Błąd bazy danych: ${error.message}</p>`;
+            var container = document.getElementById('lista-zgloszen');
+            var res = await bazaDanych.from('zgloszenia').select('*').order('created_at', { ascending: false });
+            if (res.error) {
+                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy: ' + res.error.message + '</div>';
                 return;
             }
+            allData = res.data || [];
+            renderList();
+        }
 
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="text-slate-500">Brak wpisów w bazie.</p>`;
+        function renderList() {
+            var container = document.getElementById('lista-zgloszen');
+            var filtered = currentFilter === 'ALL' ? allData : allData.filter(function(item) { return item.typ === currentFilter; });
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="background:#fff; padding:28px; border-radius:16px; text-align:center; color:#94a3b8;">Brak wpisów w tej kategorii.</div>';
                 return;
             }
-
-            container.innerHTML = data.map(item => {
-                const date = new Date(item.created_at).toLocaleString('pl-PL');
-                const isChecklista = item.typ === 'Checklista';
-                const badgeTyp = isChecklista 
-                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">📋 KONTROLA PRZED TRASĄ</span>`
-                    : `<span class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full">🔧 USTERKA</span>`;
-
-                const statusColor = item.status === 'Gotowe' ? 'bg-green-100 text-green-800' : 
-                                    item.status === 'W trakcie' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800';
-
-                const checklistaHtml = item.lista_kontrolna 
-                    ? `<div class="bg-slate-50 p-3 rounded-lg border text-sm whitespace-pre-line font-medium text-slate-700">${item.lista_kontrolna}</div>` 
-                    : '';
-
-                return `
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
-                    <div class="flex flex-wrap justify-between items-start gap-2 border-b pb-3">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="font-mono font-bold text-lg text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded">${item.auto}</span>
-                            ${badgeTyp}
-                            <span class="text-sm text-slate-600">Kierowca: <b>${item.kierowca}</b></span>
-                            <span class="text-xs text-slate-400">(${date})</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <select onchange="updateStatus(${item.id}, this.value)" class="text-sm font-semibold rounded-lg px-3 py-1.5 border ${statusColor}">
-                                <option value="Do zrobienia" ${item.status === 'Do zrobienia' ? 'selected' : ''}>🔴 Do zrobienia / Sprawdzenia</option>
-                                <option value="W trakcie" ${item.status === 'W trakcie' ? 'selected' : ''}>🟡 W trakcie</option>
-                                <option value="Gotowe" ${item.status === 'Gotowe' ? 'selected' : ''}>🟢 Zatwierdzone / Gotowe</option>
-                            </select>
-                            <button onclick="deleteEntry(${item.id})" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg text-sm" title="Usuń wpis">🗑️</button>
-                        </div>
-                    </div>
-
-                    ${checklistaHtml}
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase">Uwagi kierowcy:</label>
-                            <textarea id="opis-${item.id}" rows="2" class="w-full mt-1 border rounded-lg p-2 text-sm text-slate-800">${item.opis}</textarea>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase">Twoje uwagi / odpowiedź:</label>
-                            <textarea id="admin-${item.id}" rows="2" placeholder="Dopisz uwagi dla kierowcy lub mechaników..." class="w-full mt-1 border border-amber-300 bg-amber-50/30 rounded-lg p-2 text-sm text-slate-800">${item.uwagi_admina || ''}</textarea>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <button onclick="saveChanges(${item.id})" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg">
-                            💾 Zapisz zmiany w tekście
-                        </button>
-                    </div>
-                </div>
-                `;
-            }).join('');
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var item = filtered[i];
+                var date = new Date(item.created_at).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' });
+                var isChecklista = item.typ === 'Checklista';
+                var borderClass = isChecklista ? 'border-green' : 'border-red';
+                var badgeTyp = isChecklista ? '<span class="type-badge type-green">📋 Przed trasą</span>' : '<span class="type-badge type-red">🔧 Usterka</span>';
+                var checklistaHtml = '';
+                if (item.lista_kontrolna) {
+                    var lines = item.lista_kontrolna.split('\n');
+                    var chips = '';
+                    for (var j = 0; j < lines.length; j++) {
+                        var line = lines[j];
+                        var isMissing = line.indexOf('❌') !== -1;
+                        chips += '<span class="chip ' + (isMissing ? 'chip-miss' : 'chip-ok') + '">' + line + '</span>';
+                    }
+                    checklistaHtml = '<div class="chips">' + chips + '</div>';
+                }
+                var s1 = item.status === 'Do zrobienia' ? 'selected' : '';
+                var s2 = item.status === 'W trakcie' ? 'selected' : '';
+                var s3 = item.status === 'Gotowe' ? 'selected' : '';
+                html += '<div class="item-card ' + borderClass + '"><div class="item-top"><div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;"><span class="auto-badge">' + item.auto + '</span>' + badgeTyp + '<span style="font-size:14px; font-weight:700;">' + item.kierowca + '</span><span style="font-size:12px; color:#64748b;">• ' + date + '</span></div><button onclick="deleteEntry(' + item.id + ')" class="del-btn">🗑️ Usuń</button></div>' + checklistaHtml + '<div class="text-grid"><div><label class="small-label">Uwagi kierowcy</label><textarea id="opis-' + item.id + '" rows="2" class="textarea">' + item.opis + '</textarea></div><div><label class="small-label" style="color:#b45309;">Twoje uwagi / dla mechaników</label><textarea id="admin-' + item.id + '" rows="2" placeholder="Dopisz uwagi..." class="textarea textarea-admin">' + (item.uwagi_admina || '') + '</textarea></div></div><div class="actions"><select onchange="updateStatus(' + item.id + ', this.value)" class="status-select"><option value="Do zrobienia" ' + s1 + '>🔴 Nowe / Do zrobienia</option><option value="W trakcie" ' + s2 + '>🟡 W trakcie</option><option value="Gotowe" ' + s3 + '>🟢 Zatwierdzone / Gotowe</option></select><button onclick="saveChanges(' + item.id + ')" class="save-btn">💾 Zapisz zmiany</button></div></div>';
+            }
+            container.innerHTML = html;
         }
 
         async function addEntry() {
-            const auto = document.getElementById('new-auto').value.trim();
-            const opis = document.getElementById('new-opis').value.trim();
+            var auto = document.getElementById('new-auto').value.trim();
+            var opis = document.getElementById('new-opis').value.trim();
             if (!auto || !opis) return alert('Wpisz auto i opis!');
-
-            const { error } = await bazaDanych.from('zgloszenia').insert([{ auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis }]);
-            if (error) return alert('Błąd dodawania: ' + error.message);
-
+            var res = await bazaDanych.from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis: opis }]);
+            if (res.error) return alert('Błąd: ' + res.error.message);
             document.getElementById('new-auto').value = '';
             document.getElementById('new-opis').value = '';
             loadData();
         }
 
         async function saveChanges(id) {
-            const opis = document.getElementById(`opis-${id}`).value;
-            const uwagi_admina = document.getElementById(`admin-${id}`).value;
-            const { error } = await bazaDanych.from('zgloszenia').update({ opis, uwagi_admina }).eq('id', id);
-            if (error) return alert('Błąd zapisu: ' + error.message);
+            var opis = document.getElementById('opis-' + id).value;
+            var uwagi_admina = document.getElementById('admin-' + id).value;
+            var res = await bazaDanych.from('zgloszenia').update({ opis: opis, uwagi_admina: uwagi_admina }).eq('id', id);
+            if (res.error) return alert('Błąd: ' + res.error.message);
             alert('Zapisano zmiany!');
         }
 
         async function updateStatus(id, status) {
-            const { error } = await bazaDanych.from('zgloszenia').update({ status }).eq('id', id);
-            if (error) return alert('Błąd zmiany statusu: ' + error.message);
+            var res = await bazaDanych.from('zgloszenia').update({ status: status }).eq('id', id);
+            if (res.error) return alert('Błąd: ' + res.error.message);
             loadData();
         }
 
         async function deleteEntry(id) {
             if (confirm('Na pewno usunąć ten wpis?')) {
-                const { error } = await bazaDanych.from('zgloszenia').delete().eq('id', id);
-                if (error) return alert('Błąd usuwania: ' + error.message);
+                var res = await bazaDanych.from('zgloszenia').delete().eq('id', id);
+                if (res.error) return alert('Błąd: ' + res.error.message);
                 loadData();
             }
         }
