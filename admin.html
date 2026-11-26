@@ -1,220 +1,114 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Zarządzania Flotą</title>
-    <script src="https://jsdelivr.net"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #f1f5f9; color: #1e293b; min-height: 100vh; }
-        .hidden { display: none !important; }
-        .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: #0f172a; }
-        .login-card { background: #ffffff; width: 100%; max-width: 380px; padding: 32px 24px; border-radius: 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-        .login-input { width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 16px; text-align: center; margin: 16px 0; }
-        .login-btn { width: 100%; padding: 14px; background: #0f172a; color: #ffffff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
-        .topbar { background: #0f172a; color: #ffffff; padding: 16px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .topbar-inner { max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .refresh-btn { background: #2563eb; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
-        .container { max-width: 900px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-        .add-box { background: #ffffff; padding: 18px; border-radius: 18px; border: 1px solid #e2e8f0; }
-        .add-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
-        @media (min-width: 640px) { .add-grid { grid-template-columns: 1fr 2fr auto; } }
-        .input { width: 100%; padding: 11px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: #f8fafc; }
-        .add-btn { background: #059669; color: #ffffff; border: none; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
-        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
-        .filter-btn { padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; }
-        .filter-btn.active { background: #0f172a; color: #ffffff; border-color: #0f172a; }
-        .item-card { background: #ffffff; border-radius: 18px; padding: 18px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 14px; }
-        .border-green { border-left: 5px solid #10b981; }
-        .border-red { border-left: 5px solid #ef4444; }
-        .item-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
-        .auto-badge { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 15px; }
-        .type-badge { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
-        .type-green { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-        .type-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-        .chips { display: flex; flex-wrap: wrap; gap: 6px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
-        .chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
-        .chip-ok { background: #dcfce7; color: #166534; }
-        .chip-bad { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .chip-skip { background: #e2e8f0; color: #475569; }
-        .attached-img { max-width: 100%; max-height: 280px; border-radius: 12px; border: 1.5px solid #cbd5e1; object-fit: contain; background: #0f172a; }
-        .text-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media (min-width: 640px) { .text-grid { grid-template-columns: 1fr 1fr; } }
-        .small-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
-        .textarea { width: 100%; padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; background: #f8fafc; }
-        .textarea-admin { background: #fffbeb; border-color: #fcd34d; }
-        .actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .status-select { padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1.5px solid #cbd5e1; background: #ffffff; }
-        .save-btn { background: #1e293b; color: #ffffff; border: none; padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
-        .del-btn { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Floty</title>
+<script src="https://unpkg.com"></script>
+<style>
+body{font-family:sans-serif;background:#f1f5f9;margin:0;padding:15px}
+.box{max-width:700px;margin:auto;background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+input,textarea,select{width:100%;padding:10px;margin:6px 0 12px;border:1px solid #cbd5e1;border-radius:8px;box-sizing:border-box;font-size:14px}
+button{padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;color:#fff;background:#0f172a}
+.card{border:1px solid #e2e8f0;border-left:5px solid #2563eb;padding:15px;border-radius:12px;margin-bottom:15px;background:#fff}
+.chip{display:inline-block;padding:4px 8px;margin:2px;border-radius:6px;font-size:12px;background:#e2e8f0}
+img{max-width:100%;max-height:250px;border-radius:8px;margin-top:8px}
+.hide{display:none}
+</style>
 </head>
 <body>
-    <div id="login-screen" class="login-wrap">
-        <div class="login-card">
-            <span style="background:#f1f5f9; padding:4px 12px; border-radius:99px; font-size:11px; font-weight:700; color:#475569;">STREFA ZARZĄDZANIA</span>
-            <h2 style="margin-top:12px; font-size:22px;">Panel Floty</h2>
-            <input type="password" id="pass-input" class="login-input" onkeypress="if(event.key==='Enter') checkPass()" placeholder="Wpisz hasło dostępu">
-            <button onclick="checkPass()" class="login-btn">Zaloguj się</button>
-        </div>
+
+<div id="login" class="box" style="max-width:340px;margin-top:60px;text-align:center">
+  <h2>Panel Szefa</h2>
+  <input type="password" id="pass" placeholder="Hasło (Flota2026)">
+  <button onclick="zaloguj()" style="width:100%">Wejdź</button>
+</div>
+
+<div id="panel" class="box hide">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+    <h2 style="margin:0">🚛 Flota Gołaszewski</h2>
+    <button onclick="pobierz()" style="background:#2563eb">🔄 Odśwież</button>
+  </div>
+
+  <div style="background:#f8fafc;padding:12px;border-radius:10px;margin-bottom:20px;border:1px solid #e2e8f0">
+    <b>➕ Dodaj zlecenie:</b>
+    <input id="n-auto" placeholder="Nr auta (np. SCANIA 01)">
+    <input id="n-opis" placeholder="Co trzeba zrobić?">
+    <button onclick="dodaj()" style="background:#059669;width:100%">Dodaj</button>
+  </div>
+
+  <div id="lista">Ładowanie...</div>
+</div>
+
+<script>
+const URL = 'https://supabase.co';
+const KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+const db = window.supabase.createClient(URL, KEY);
+
+function zaloguj() {
+  if (document.getElementById('pass').value === 'Flota2026') {
+    document.getElementById('login').classList.add('hide');
+    document.getElementById('panel').classList.remove('hide');
+    pobierz();
+  } else alert('Złe hasło');
+}
+
+async function pobierz() {
+  const el = document.getElementById('lista');
+  const { data, error } = await db.from('zgloszenia').select('*').order('created_at', { ascending: false });
+  if (error) { el.innerHTML = 'Błąd: ' + error.message; return; }
+  if (!data.length) { el.innerHTML = 'Brak wpisów.'; return; }
+
+  el.innerHTML = data.map(x => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between">
+        <b>${x.auto} (${x.typ || 'Usterka'}) – ${x.kierowca}</b>
+        <button onclick="usun(${x.id})" style="background:#dc2626;padding:5px 10px">🗑️</button>
+      </div>
+      <small style="color:#64748b">${new Date(x.created_at).toLocaleString('pl-PL')}</small>
+      ${x.lista_kontrolna ? '<div style="margin:8px 0">' + x.lista_kontrolna.split('\n').map(l => '<span class="chip">'+l+'</span>').join('') + '</div>' : ''}
+      ${x.zdjecie ? '<div><img src="'+x.zdjecie+'"></div>' : ''}
+      <label style="font-size:12px;font-weight:bold;display:block;margin-top:8px">Uwagi kierowcy:</label>
+      <textarea id="o-${x.id}" rows="2">${x.opis}</textarea>
+      <label style="font-size:12px;font-weight:bold;color:#b45309">Uwagi szefa / dla mechaników:</label>
+      <textarea id="a-${x.id}" rows="2" style="background:#fffbeb">${x.uwagi_admina || ''}</textarea>
+      <div style="display:flex;gap:8px">
+        <select onchange="status(${x.id}, this.value)">
+          <option ${x.status==='Do zrobienia'?'selected':''}>Do zrobienia</option>
+          <option ${x.status==='W trakcie'?'selected':''}>W trakcie</option>
+          <option ${x.status==='Gotowe'?'selected':''}>Gotowe</option>
+        </select>
+        <button onclick="zapisz(${x.id})" style="background:#1e293b;white-space:nowrap">💾 Zapisz</button>
+      </div>
     </div>
-    <div id="admin-panel" class="hidden">
-        <div class="topbar">
-            <div class="topbar-inner">
-                <div>
-                    <div style="font-size:18px; font-weight:800;">🚛 Flota Gołaszewski</div>
-                    <div style="font-size:11px; color:#94a3b8;">Kontrole przed trasą, zdjęcia i usterki</div>
-                </div>
-                <button onclick="loadData()" class="refresh-btn">🔄 Odśwież</button>
-            </div>
-        </div>
-        <div class="container">
-            <div class="add-box">
-                <div class="small-label">➕ Dodaj własne zlecenie dla mechaników</div>
-                <div class="add-grid">
-                    <input type="text" id="new-auto" class="input" placeholder="Nr auta (np. SCANIA 01)">
-                    <input type="text" id="new-opis" class="input" placeholder="Co trzeba zrobić?">
-                    <button onclick="addEntry()" class="add-btn">Dodaj wpis</button>
-                </div>
-            </div>
-            <div class="filters">
-                <button onclick="setFilter('ALL')" id="filter-ALL" class="filter-btn active">Wszystkie</button>
-                <button onclick="setFilter('Usterka')" id="filter-Usterka" class="filter-btn">🔧 Tylko usterki</button>
-                <button onclick="setFilter('Checklista')" id="filter-Checklista" class="filter-btn">📋 Kontrole przed trasą</button>
-            </div>
-            <div id="lista-zgloszen" style="display:flex; flex-direction:column; gap:14px;">
-                <p style="text-align:center; color:#64748b; padding:24px;">Ładowanie danych...</p>
-            </div>
-        </div>
-    </div>
-    <script>
-        var SUPABASE_URL = 'https://supabase.co';
-        var SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
-        var HASLO_ADMINA = 'Flota2026'; 
-        var allData = [];
-        var currentFilter = 'ALL';
-        var bazaDanych = null;
+  `).join('');
+}
 
-        function getDb() {
-            if (!bazaDanych && window.supabase) {
-                bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-            return bazaDanych;
-        }
+async function dodaj() {
+  const auto = document.getElementById('n-auto').value.trim();
+  const opis = document.getElementById('n-opis').value.trim();
+  if (!auto || !opis) return alert('Wpisz auto i opis');
+  await db.from('zgloszenia').insert([{ auto, kierowca: 'SZEF', typ: 'Usterka', opis }]);
+  document.getElementById('n-auto').value = '';
+  document.getElementById('n-opis').value = '';
+  pobierz();
+}
 
-        function checkPass() {
-            if (document.getElementById('pass-input').value === HASLO_ADMINA) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                loadData();
-            } else {
-                alert('Błędne hasło!');
-            }
-        }
+async function zapisz(id) {
+  await db.from('zgloszenia').update({
+    opis: document.getElementById('o-'+id).value,
+    uwagi_admina: document.getElementById('a-'+id).value
+  }).eq('id', id);
+  alert('Zapisano!');
+}
 
-        function setFilter(filter) {
-            currentFilter = filter;
-            var tabs = ['ALL', 'Usterka', 'Checklista'];
-            for (var i = 0; i < tabs.length; i++) {
-                var f = tabs[i];
-                document.getElementById('filter-' + f).className = (f === filter) ? 'filter-btn active' : 'filter-btn';
-            }
-            renderList();
-        }
+async function status(id, status) {
+  await db.from('zgloszenia').update({ status }).eq('id', id);
+}
 
-        async function loadData() {
-            var container = document.getElementById('lista-zgloszen');
-            container.innerHTML = '<p style="text-align:center; color:#64748b; padding:24px;">Ładowanie danych...</p>';
-            var db = getDb();
-            if (!db) {
-                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Odśwież stronę (F5) – biblioteka jeszcze się ładuje.</div>';
-                return;
-            }
-            var res = await db.from('zgloszenia').select('*').order('created_at', { ascending: false });
-            if (res.error) {
-                container.innerHTML = '<div style="background:#fee2e2; color:#991b1b; padding:16px; border-radius:12px; font-weight:700;">Błąd bazy: ' + res.error.message + '</div>';
-                return;
-            }
-            allData = res.data || [];
-            renderList();
-        }
-
-        function renderList() {
-            var container = document.getElementById('lista-zgloszen');
-            var filtered = currentFilter === 'ALL' ? allData : allData.filter(function(item) { return item.typ === currentFilter; });
-            if (!filtered || filtered.length === 0) {
-                container.innerHTML = '<div style="background:#fff; padding:28px; border-radius:16px; text-align:center; color:#94a3b8;">Brak wpisów w bazie danych.</div>';
-                return;
-            }
-            var html = '';
-            for (var i = 0; i < filtered.length; i++) {
-                var item = filtered[i];
-                var date = new Date(item.created_at).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' });
-                var isChecklista = item.typ === 'Checklista';
-                var borderClass = isChecklista ? 'border-green' : 'border-red';
-                var badgeTyp = isChecklista ? '<span class="type-badge type-green">📋 Przed trasą</span>' : '<span class="type-badge type-red">🔧 Usterka</span>';
-                
-                var checklistaHtml = '';
-                if (item.lista_kontrolna) {
-                    var lines = item.lista_kontrolna.split('\n');
-                    var chips = '';
-                    for (var j = 0; j < lines.length; j++) {
-                        var line = lines[j];
-                        var cls = 'chip-skip';
-                        if (line.indexOf('✅') !== -1) cls = 'chip-ok';
-                        else if (line.indexOf('⚠️') !== -1 || line.indexOf('❌') !== -1) cls = 'chip-bad';
-                        chips += '<span class="chip ' + cls + '">' + line + '</span>';
-                    }
-                    checklistaHtml = '<div class="chips">' + chips + '</div>';
-                }
-
-                var photoHtml = '';
-                if (item.zdjecie && item.zdjecie.length > 20) {
-                    photoHtml = '<div><div class="small-label">📷 Załączone zdjęcie</div><img src="' + item.zdjecie + '" class="attached-img" alt="Zdjęcie pojazdu"></div>';
-                }
-
-                var s1 = item.status === 'Do zrobienia' ? 'selected' : '';
-                var s2 = item.status === 'W trakcie' ? 'selected' : '';
-                var s3 = item.status === 'Gotowe' ? 'selected' : '';
-
-                html += '<div class="item-card ' + borderClass + '"><div class="item-top"><div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;"><span class="auto-badge">' + item.auto + '</span>' + badgeTyp + '<span style="font-size:14px; font-weight:700;">' + item.kierowca + '</span><span style="font-size:12px; color:#64748b;">• ' + date + '</span></div><button onclick="deleteEntry(' + item.id + ')" class="del-btn">🗑️ Usuń</button></div>' + checklistaHtml + photoHtml + '<div class="text-grid"><div><label class="small-label">Uwagi kierowcy</label><textarea id="opis-' + item.id + '" rows="2" class="textarea">' + item.opis + '</textarea></div><div><label class="small-label" style="color:#b45309;">Twoje uwagi / dla mechaników</label><textarea id="admin-' + item.id + '" rows="2" placeholder="Dopisz uwagi..." class="textarea textarea-admin">' + (item.uwagi_admina || '') + '</textarea></div></div><div class="actions"><select onchange="updateStatus(' + item.id + ', this.value)" class="status-select"><option value="Do zrobienia" ' + s1 + '>🔴 Nowe / Do zrobienia</option><option value="W trakcie" ' + s2 + '>🟡 W trakcie</option><option value="Gotowe" ' + s3 + '>🟢 Zatwierdzone / Gotowe</option></select><button onclick="saveChanges(' + item.id + ')" class="save-btn">💾 Zapisz zmiany</button></div></div>';
-            }
-            container.innerHTML = html;
-        }
-
-        async function addEntry() {
-            var auto = document.getElementById('new-auto').value.trim();
-            var opis = document.getElementById('new-opis').value.trim();
-            if (!auto || !opis) return alert('Wpisz auto i opis!');
-            var res = await getDb().from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF / BIURO', typ: 'Usterka', opis: opis }]);
-            if (res.error) return alert('Błąd: ' + res.error.message);
-            document.getElementById('new-auto').value = '';
-            document.getElementById('new-opis').value = '';
-            loadData();
-        }
-
-        async function saveChanges(id) {
-            var opis = document.getElementById('opis-' + id).value;
-            var uwagi_admina = document.getElementById('admin-' + id).value;
-            var res = await getDb().from('zgloszenia').update({ opis: opis, uwagi_admina: uwagi_admina }).eq('id', id);
-            if (res.error) return alert('Błąd: ' + res.error.message);
-            alert('Zapisano zmiany!');
-        }
-
-        async function updateStatus(id, status) {
-            var res = await getDb().from('zgloszenia').update({ status: status }).eq('id', id);
-            if (res.error) return alert('Błąd: ' + res.error.message);
-            loadData();
-        }
-
-        async function deleteEntry(id) {
-            if (confirm('Na pewno usunąć ten wpis?')) {
-                var res = await getDb().from('zgloszenia').delete().eq('id', id);
-                if (res.error) return alert('Błąd: ' + res.error.message);
-                loadData();
-            }
-        }
-    </script>
+async function usun(id) {
+  if (confirm('Usunąć?')) { await db.from('zgloszenia').delete().eq('id', id); pobierz(); }
+}
+</script>
 </body>
 </html>
