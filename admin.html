@@ -41,36 +41,47 @@ img{max-width:100%;max-height:250px;border-radius:8px;margin-top:8px}
 </div>
 
 <script>
-const SB_URL = 'https://supabase.co';
-const SB_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
-const db = window.supabase.createClient(SB_URL, SB_KEY);
+var SB_URL = 'https://supabase.co';
+var SB_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+var db = null;
+
+function getDb() {
+  if (!db) {
+    db = window.supabase.createClient(SB_URL, SB_KEY);
+  }
+  return db;
+}
 
 function zaloguj() {
   if (document.getElementById('pass').value === 'Flota2026') {
     document.getElementById('login').classList.add('hide');
     document.getElementById('panel').classList.remove('hide');
     pobierz();
-  } else alert('Złe hasło');
+  } else {
+    alert('Złe hasło');
+  }
 }
 
 async function pobierz() {
-  const el = document.getElementById('lista');
+  var el = document.getElementById('lista');
   el.innerHTML = 'Pobieranie z bazy...';
   try {
-    const { data, error } = await db.from('zgloszenia').select('*').order('created_at', { ascending: false });
-    if (error) { el.innerHTML = 'Błąd bazy: ' + error.message; return; }
+    var client = getDb();
+    var res = await client.from('zgloszenia').select('*').order('created_at', { ascending: false });
+    if (res.error) { el.innerHTML = 'Błąd bazy: ' + res.error.message; return; }
+    var data = res.data;
     if (!data || !data.length) { el.innerHTML = 'Brak wpisów w bazie.'; return; }
 
-    let out = '';
-    for (let i = 0; i < data.length; i++) {
-      const x = data[i];
-      let chips = '';
+    var out = '';
+    for (var i = 0; i < data.length; i++) {
+      var x = data[i];
+      var chips = '';
       if (x.lista_kontrolna) {
-        const arr = x.lista_kontrolna.split('\n');
-        for (let j = 0; j < arr.length; j++) chips += '<span class="chip">' + arr[j] + '</span>';
+        var arr = x.lista_kontrolna.split('\n');
+        for (var j = 0; j < arr.length; j++) chips += '<span class="chip">' + arr[j] + '</span>';
         chips = '<div style="margin:8px 0">' + chips + '</div>';
       }
-      const img = x.zdjecie ? '<div><img src="' + x.zdjecie + '"></div>' : '';
+      var img = x.zdjecie ? '<div><img src="' + x.zdjecie + '"></div>' : '';
       out += '<div class="card">' +
         '<div style="display:flex;justify-content:space-between">' +
           '<b>' + x.auto + ' (' + (x.typ || 'Usterka') + ') – ' + x.kierowca + '</b>' +
@@ -99,17 +110,17 @@ async function pobierz() {
 }
 
 async function dodaj() {
-  const auto = document.getElementById('n-auto').value.trim();
-  const opis = document.getElementById('n-opis').value.trim();
+  var auto = document.getElementById('n-auto').value.trim();
+  var opis = document.getElementById('n-opis').value.trim();
   if (!auto || !opis) return alert('Wpisz auto i opis');
-  await db.from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF', typ: 'Usterka', opis: opis }]);
+  await getDb().from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF', typ: 'Usterka', opis: opis }]);
   document.getElementById('n-auto').value = '';
   document.getElementById('n-opis').value = '';
   pobierz();
 }
 
 async function zapisz(id) {
-  await db.from('zgloszenia').update({
+  await getDb().from('zgloszenia').update({
     opis: document.getElementById('o-'+id).value,
     uwagi_admina: document.getElementById('a-'+id).value
   }).eq('id', id);
@@ -117,11 +128,11 @@ async function zapisz(id) {
 }
 
 async function status(id, s) {
-  await db.from('zgloszenia').update({ status: s }).eq('id', id);
+  await getDb().from('zgloszenia').update({ status: s }).eq('id', id);
 }
 
 async function usun(id) {
-  if (confirm('Usunąć?')) { await db.from('zgloszenia').delete().eq('id', id); pobierz(); }
+  if (confirm('Usunąć?')) { await getDb().from('zgloszenia').delete().eq('id', id); pobierz(); }
 }
 </script>
 </body>
