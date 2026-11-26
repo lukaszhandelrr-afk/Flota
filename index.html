@@ -3,37 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zgłoszenie serwisowe</title>
+    <title>System Flotowy NFC</title>
     <script src="https://tailwindcss.com"></script>
     <script src="https://unpkg.com"></script>
 </head>
 <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
 
     <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
-        <div class="text-center mb-6">
+        <div class="text-center mb-5">
             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase">System Flotowy NFC</span>
-            <h1 class="text-2xl font-bold text-slate-800 mt-2">Zgłoś uwagi do auta</h1>
-            <p id="auto-display" class="text-lg font-mono font-bold text-blue-600 mt-1">Wczytywanie pojazdu...</p>
+            <p id="auto-display" class="text-xl font-mono font-bold text-blue-600 mt-2">Wczytywanie pojazdu...</p>
+        </div>
+
+        <!-- Przełącznik trybu -->
+        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl mb-5">
+            <button type="button" id="tab-checklista" onclick="setMode('Checklista')" class="py-2 text-sm font-bold rounded-lg bg-white text-blue-600 shadow-sm transition">
+                📋 Przed trasą
+            </button>
+            <button type="button" id="tab-usterka" onclick="setMode('Usterka')" class="py-2 text-sm font-bold rounded-lg text-slate-600 transition">
+                🔧 Zgłoś usterkę
+            </button>
         </div>
 
         <form id="zgloszenie-form" class="space-y-4">
             <div id="manual-auto-box" class="hidden">
                 <label class="block text-sm font-medium text-slate-700">Numer rejestracyjny / Nazwa auta</label>
-                <input type="text" id="auto-input" class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="np. WA 12345">
+                <input type="text" id="auto-input" class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5" placeholder="np. WA 12345">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-slate-700">Imię i nazwisko kierowcy</label>
-                <input type="text" id="kierowca" required class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Jan Kowalski">
+                <input type="text" id="kierowca" required class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5" placeholder="Jan Kowalski">
             </div>
 
+            <!-- SEKCJA CHECKLISTY PRZED TRASĄ -->
+            <div id="sekcja-checklista" class="space-y-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <p class="text-xs font-bold text-slate-500 uppercase mb-2">Odhacz sprawdzone punkty:</p>
+                
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Poziom oleju">
+                    <span class="text-sm font-medium text-slate-800">🛢️ Sprawdzenie oleju</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Oświetlenie pojazdu">
+                    <span class="text-sm font-medium text-slate-800">💡 Sprawdzenie świateł</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Stan opon i ciśnienie">
+                    <span class="text-sm font-medium text-slate-800">🛞 Sprawdzenie opon</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Porządek w kabinie">
+                    <span class="text-sm font-medium text-slate-800">🧹 Porządek w kabinie</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Wyposażenie i dokumenty ADR">
+                    <span class="text-sm font-medium text-slate-800">☣️ Wyposażenie / dokumenty ADR</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Gaśnica (obecność i ważność)">
+                    <span class="text-sm font-medium text-slate-800">🧯 Gaśnica na miejscu</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="check-item w-5 h-5 accent-blue-600" value="Licencja przewoźnika w aucie">
+                    <span class="text-sm font-medium text-slate-800">📄 Licencja przewoźnika</span>
+                </label>
+            </div>
+
+            <!-- POLE OPISU -->
             <div>
-                <label class="block text-sm font-medium text-slate-700">Co jest do zrobienia? (uwagi dla mechaników)</label>
-                <textarea id="opis" rows="4" required class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Opisz usterki, braki płynów, stuki itp..."></textarea>
+                <label id="opis-label" class="block text-sm font-medium text-slate-700">Dodatkowe uwagi przed wyjazdem (opcjonalnie)</label>
+                <textarea id="opis" rows="3" class="mt-1 block w-full rounded-lg border-slate-300 border p-2.5" placeholder="Wpisz jeśli czegoś brakuje lub wymaga uwagi..."></textarea>
             </div>
 
-            <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                Wyślij do mechaników
+            <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                Zatwierdź kontrolę przed trasą
             </button>
         </form>
 
@@ -43,10 +93,12 @@
     <script>
         const SUPABASE_URL = 'https://supabase.co';
         const SUPABASE_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentMode = 'Checklista';
 
         const urlParams = new URLSearchParams(window.location.search);
         const autoParam = urlParams.get('auto');
-        
         const autoDisplay = document.getElementById('auto-display');
         const manualAutoBox = document.getElementById('manual-auto-box');
         const autoInput = document.getElementById('auto-input');
@@ -60,7 +112,33 @@
             autoInput.required = true;
         }
 
-        const bazaDanych = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        function setMode(mode) {
+            currentMode = mode;
+            const tabCheck = document.getElementById('tab-checklista');
+            const tabUsterka = document.getElementById('tab-usterka');
+            const sekcjaCheck = document.getElementById('sekcja-checklista');
+            const opisLabel = document.getElementById('opis-label');
+            const opisInput = document.getElementById('opis');
+            const btn = document.getElementById('submit-btn');
+
+            if (mode === 'Checklista') {
+                tabCheck.className = 'py-2 text-sm font-bold rounded-lg bg-white text-blue-600 shadow-sm transition';
+                tabUsterka.className = 'py-2 text-sm font-bold rounded-lg text-slate-600 transition';
+                sekcjaCheck.classList.remove('hidden');
+                opisLabel.textContent = 'Dodatkowe uwagi przed wyjazdem (opcjonalnie)';
+                opisInput.required = false;
+                btn.textContent = 'Zatwierdź kontrolę przed trasą';
+                btn.className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition';
+            } else {
+                tabUsterka.className = 'py-2 text-sm font-bold rounded-lg bg-white text-red-600 shadow-sm transition';
+                tabCheck.className = 'py-2 text-sm font-bold rounded-lg text-slate-600 transition';
+                sekcjaCheck.classList.add('hidden');
+                opisLabel.textContent = 'Co jest do zrobienia? (uwagi dla mechaników)';
+                opisInput.required = true;
+                btn.textContent = 'Wyślij usterkę do mechaników';
+                btn.className = 'w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition';
+            }
+        }
 
         document.getElementById('zgloszenie-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -68,25 +146,35 @@
             const msg = document.getElementById('status-msg');
             
             btn.disabled = true;
-            btn.textContent = 'Wysyłanie...';
+            btn.textContent = 'Zapisywanie...';
+
+            let podsumowanieListy = '';
+            if (currentMode === 'Checklista') {
+                const items = document.querySelectorAll('.check-item');
+                const wyniki = [];
+                items.forEach(item => {
+                    wyniki.push(`${item.checked ? '✅' : '❌ BRAK:'} ${item.value}`);
+                });
+                podsumowanieListy = wyniki.join('\n');
+            }
+
+            const opisTekst = document.getElementById('opis').value.trim() || (currentMode === 'Checklista' ? 'Kontrola przed trasą wykonana.' : '');
 
             const { error } = await bazaDanych.from('zgloszenia').insert([{
                 auto: autoInput.value.trim(),
                 kierowca: document.getElementById('kierowca').value.trim(),
-                opis: document.getElementById('opis').value.trim()
+                typ: currentMode,
+                lista_kontrolna: podsumowanieListy,
+                opis: opisTekst
             }]);
 
             if (error) {
                 msg.textContent = 'Błąd bazy danych: ' + error.message;
                 msg.className = 'mt-4 p-4 rounded-lg text-center font-medium bg-red-100 text-red-700 block';
                 btn.disabled = false;
-                btn.textContent = 'Wyślij do mechaników';
             } else {
                 document.getElementById('zgloszenie-form').classList.add('hidden');
-                msg.innerHTML = '✅ <b>Zapisano!</b><br>Uwagi zostały przekazane do warsztatu.';
+                msg.innerHTML = '✅ <b>Zapisano pomyślnie!</b><br>Szerokiej drogi!';
                 msg.className = 'mt-4 p-4 rounded-lg text-center font-medium bg-green-100 text-green-800 block';
             }
         });
-    </script>
-</body>
-</html>
