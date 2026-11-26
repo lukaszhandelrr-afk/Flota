@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Floty</title>
+<script src="https://jsdelivr.net"></script>
 <style>
 body{font-family:sans-serif;background:#f1f5f9;margin:0;padding:15px}
 .box{max-width:700px;margin:auto;background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
@@ -40,8 +41,9 @@ img{max-width:100%;max-height:250px;border-radius:8px;margin-top:8px}
 </div>
 
 <script>
-var BASE = 'https://supabase.co';
-var KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+var SB_URL = 'https://supabase.co';
+var SB_KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
+var db = null;
 
 function zaloguj() {
   if (document.getElementById('pass').value === 'Flota2026') {
@@ -55,16 +57,14 @@ function zaloguj() {
 
 async function pobierz() {
   var el = document.getElementById('lista');
-  el.innerHTML = 'Pobieranie z bazy...';
+  el.innerHTML = 'Łączenie z bazą...';
   try {
-    var res = await fetch(BASE + '?select=*&order=created_at.desc', {
-      headers: { 'apikey': KEY }
-    });
-    if (!res.ok) {
-      el.innerHTML = 'Błąd bazy (' + res.status + '): ' + (await res.text());
-      return;
+    if (!db) {
+      db = window.supabase.createClient(SB_URL, SB_KEY);
     }
-    var data = await res.json();
+    var res = await db.from('zgloszenia').select('*').order('created_at', { ascending: false });
+    if (res.error) { el.innerHTML = 'Błąd bazy: ' + res.error.message; return; }
+    var data = res.data;
     if (!data || !data.length) { el.innerHTML = 'Brak wpisów w bazie.'; return; }
 
     var out = '';
@@ -100,7 +100,7 @@ async function pobierz() {
     }
     el.innerHTML = out;
   } catch (e) {
-    el.innerHTML = 'Błąd połączenia: ' + e.message;
+    el.innerHTML = 'Błąd: ' + e.message;
   }
 }
 
@@ -108,44 +108,26 @@ async function dodaj() {
   var auto = document.getElementById('n-auto').value.trim();
   var opis = document.getElementById('n-opis').value.trim();
   if (!auto || !opis) return alert('Wpisz auto i opis');
-  await fetch(BASE, {
-    method: 'POST',
-    headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ auto: auto, kierowca: 'SZEF', typ: 'Usterka', opis: opis })
-  });
+  await db.from('zgloszenia').insert([{ auto: auto, kierowca: 'SZEF', typ: 'Usterka', opis: opis }]);
   document.getElementById('n-auto').value = '';
   document.getElementById('n-opis').value = '';
   pobierz();
 }
 
 async function zapisz(id) {
-  await fetch(BASE + '?id=eq.' + id, {
-    method: 'PATCH',
-    headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      opis: document.getElementById('o-'+id).value,
-      uwagi_admina: document.getElementById('a-'+id).value
-    })
-  });
+  await db.from('zgloszenia').update({
+    opis: document.getElementById('o-'+id).value,
+    uwagi_admina: document.getElementById('a-'+id).value
+  }).eq('id', id);
   alert('Zapisano!');
 }
 
 async function status(id, s) {
-  await fetch(BASE + '?id=eq.' + id, {
-    method: 'PATCH',
-    headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: s })
-  });
+  await db.from('zgloszenia').update({ status: s }).eq('id', id);
 }
 
 async function usun(id) {
-  if (confirm('Usunąć?')) {
-    await fetch(BASE + '?id=eq.' + id, {
-      method: 'DELETE',
-      headers: { 'apikey': KEY }
-    });
-    pobierz();
-  }
+  if (confirm('Usunąć?')) { await db.from('zgloszenia').delete().eq('id', id); pobierz(); }
 }
 </script>
 </body>
