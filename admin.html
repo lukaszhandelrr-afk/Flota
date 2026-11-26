@@ -40,7 +40,7 @@ img{max-width:100%;max-height:250px;border-radius:8px;margin-top:8px}
 </div>
 
 <script>
-var BASE = '/baza/zgloszenia';
+var BASE = 'https://supabase.co';
 var KEY = 'sb_publishable_9gPLtYFR6NeElYZtIgC8ig_8vmZZB_t';
 
 function zaloguj() {
@@ -57,7 +57,9 @@ async function pobierz() {
   var el = document.getElementById('lista');
   el.innerHTML = 'Pobieranie z bazy...';
   try {
-    var res = await fetch(BASE + '?apikey=' + KEY + '&select=*&order=created_at.desc');
+    var res = await fetch(BASE + '?select=*&order=created_at.desc', {
+      headers: { 'apikey': KEY }
+    });
     if (!res.ok) {
       el.innerHTML = 'Błąd bazy (' + res.status + '): ' + (await res.text());
       return;
@@ -98,7 +100,7 @@ async function pobierz() {
     }
     el.innerHTML = out;
   } catch (e) {
-    el.innerHTML = 'Błąd sieci: ' + e.message;
+    el.innerHTML = 'Błąd połączenia: ' + e.message;
   }
 }
 
@@ -106,9 +108,9 @@ async function dodaj() {
   var auto = document.getElementById('n-auto').value.trim();
   var opis = document.getElementById('n-opis').value.trim();
   if (!auto || !opis) return alert('Wpisz auto i opis');
-  await fetch(BASE + '?apikey=' + KEY, {
+  await fetch(BASE, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ auto: auto, kierowca: 'SZEF', typ: 'Usterka', opis: opis })
   });
   document.getElementById('n-auto').value = '';
@@ -117,9 +119,9 @@ async function dodaj() {
 }
 
 async function zapisz(id) {
-  await fetch(BASE + '?id=eq.' + id + '&apikey=' + KEY, {
+  await fetch(BASE + '?id=eq.' + id, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       opis: document.getElementById('o-'+id).value,
       uwagi_admina: document.getElementById('a-'+id).value
@@ -129,17 +131,18 @@ async function zapisz(id) {
 }
 
 async function status(id, s) {
-  await fetch(BASE + '?id=eq.' + id + '&apikey=' + KEY, {
+  await fetch(BASE + '?id=eq.' + id, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: s })
   });
 }
 
 async function usun(id) {
   if (confirm('Usunąć?')) {
-    await fetch(BASE + '?id=eq.' + id + '&apikey=' + KEY, {
-      method: 'DELETE'
+    await fetch(BASE + '?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': KEY }
     });
     pobierz();
   }
